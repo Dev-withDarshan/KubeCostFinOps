@@ -154,7 +154,7 @@ KubeCostFinOps_Cloud_Project_2026/
 
 | Name | Role |
 |------|------|
-| **Darshan** | Project Lead & Primary Cloud Architect |
+| **[Darshan](https://github.com/Dev-withDarshan)** | Project Lead & Primary Cloud Architect |
 | **Tharun** | Contributor |
 | **Dhanushkodi** | Contributor |
 | **Sanjay** | Contributor |
