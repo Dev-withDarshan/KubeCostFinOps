@@ -1,0 +1,92 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+venv/
+.venv/
+env/
+.env
+*.env.local
+.python-version
+pip-log.txt
+
+# ========================
+# Node.js / React
+# ========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+package-lock.json
+yarn.lock
+
+# ========================
+# AWS
+# ========================
+*.pem
+*.key
+.aws/
+aws-exports.js
+samconfig.toml
+.aws-sam/
+
+# ========================
+# Terraform (if used later)
+# ========================
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+
+# ========================
+# Kubernetes
+# ========================
+kubeconfig
+*.kubeconfig
+
+# ========================
+# IDE & Editors
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ========================
+# Jupyter Notebooks
+# ========================
+.ipynb_checkpoints/
+
+# ========================
+# Misc
+# ========================
+*.log
+*.tmp
+*.bak
+.cache/
+coverage/
+.nyc_output/

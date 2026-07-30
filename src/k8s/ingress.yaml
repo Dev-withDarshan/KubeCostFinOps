@@ -1,0 +1,26 @@
+# ingress.yaml — Kubernetes Ingress manifest
+# Routes external HTTP traffic to the edusaas-backend Service
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: edusaas-ingress
+  namespace: default
+  labels:
+    app: edusaas-backend
+    project: kubecost-finops
+  annotations:
+    kubernetes.io/ingress.class: "alb"                         # AWS ALB Ingress Controller
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+spec:
+  rules:
+    - host: edusaas.example.com   # TODO: Replace with actual domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: edusaas-backend-svc
+                port:
+                  number: 80

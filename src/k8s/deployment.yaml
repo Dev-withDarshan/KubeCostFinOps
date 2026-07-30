@@ -1,0 +1,36 @@
+# deployment.yaml — Minimal Kubernetes Deployment manifest
+# Deploys the educational SaaS platform backend on EKS
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edusaas-backend
+  namespace: default
+  labels:
+    app: edusaas-backend
+    project: kubecost-finops
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: edusaas-backend
+  template:
+    metadata:
+      labels:
+        app: edusaas-backend
+    spec:
+      containers:
+        - name: backend
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/edusaas-backend:latest  # TODO: Replace with actual ECR image URI
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          env:
+            - name: NODE_ENV
+              value: "production"
+            # TODO: Add remaining environment variables (DB connection, etc.)

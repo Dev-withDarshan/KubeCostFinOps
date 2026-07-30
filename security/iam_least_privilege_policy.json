@@ -1,0 +1,46 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowEKSDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "eks:DescribeCluster",
+        "eks:ListClusters",
+        "eks:ListNodegroups"
+      ],
+      "Resource": "arn:aws:eks:*:*:cluster/kubecost-finops-*"
+    },
+    {
+      "Sid": "AllowS3DatasetAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::kubecost-finops-datasets",
+        "arn:aws:s3:::kubecost-finops-datasets/*"
+      ]
+    },
+    {
+      "Sid": "AllowSageMakerInference",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:InvokeEndpoint",
+        "sagemaker:DescribeEndpoint"
+      ],
+      "Resource": "arn:aws:sagemaker:*:*:endpoint/kubecost-finops-*"
+    },
+    {
+      "Sid": "AllowCloudWatchMetrics",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:GetMetricData",
+        "cloudwatch:PutMetricData"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

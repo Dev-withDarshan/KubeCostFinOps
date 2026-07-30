@@ -1,0 +1,32 @@
+# kubecost_config.yaml — Minimal Kubecost / OpenCost configuration
+# Reference: https://www.kubecost.com/install
+
+kubecost:
+  # Kubecost API endpoint (cluster-internal service)
+  api_endpoint: "http://kubecost-cost-analyzer.kubecost.svc.cluster.local:9090"
+
+  # Allocation API window (ISO 8601 duration)
+  default_window: "7d"
+
+  # Namespaces to monitor (empty list = all namespaces)
+  monitored_namespaces: []
+
+  # Cost aggregation granularity: namespace | deployment | pod
+  aggregation_level: "namespace"
+
+prometheus:
+  # Prometheus server URL used by Kubecost for metric queries
+  server_url: "http://prometheus-server.monitoring.svc.cluster.local:9090"
+
+  # Scrape interval aligned with Prometheus configuration
+  scrape_interval: "30s"
+
+thresholds:
+  # CPU utilisation below this ratio flags a resource as idle
+  idle_cpu_ratio: 0.10
+
+  # Memory utilisation below this ratio flags a resource as idle
+  idle_memory_ratio: 0.10
+
+  # Minimum monthly cost (USD) to include a resource in recommendations
+  min_cost_threshold: 1.00
