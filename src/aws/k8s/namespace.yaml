@@ -1,0 +1,21 @@
+# ==============================================================================
+# Namespace definitions for AWS EKS deployment
+# ==============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: edusaas
+  labels:
+    name: edusaas
+    environment: aws-production
+    project: kubecost-finops
+    elbv2.k8s.aws/pod-readiness-gate-inject: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: finops-system
+  labels:
+    name: finops-system
+    environment: aws-production
+    project: kubecost-finops

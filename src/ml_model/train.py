@@ -1,11 +1,13 @@
 """
-train.py — Model Training for Demand Forecasting
+train.py — Model Training Interface for Distributed Demand Forecasting
 
-Trains an ML model (e.g., XGBoost, LSTM, or Prophet) on preprocessed
-Kubernetes usage metrics to forecast upcoming demand spikes
-(exam-period traffic patterns).
-
-Designed to run locally or on Amazon SageMaker.
+Architectural Scope Notice:
+  This module defines the planned interface for enterprise AWS SageMaker training
+  jobs (e.g., distributed XGBoost, LSTM, or Prophet on S3 telemetry lakes).
+  In the current verified local prototype, operational demand forecasting is
+  actively implemented, tested, and served via `src/finops_engine/ml_forecast.py`
+  (Holt's Linear Trend / Exponential Smoothing baseline with chronological holdout
+  validation and synthetic educational diurnal simulation).
 
 Part of: Kubernetes Cost Optimization Framework (BCSE355L)
 """

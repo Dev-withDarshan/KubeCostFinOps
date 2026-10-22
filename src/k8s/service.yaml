@@ -1,18 +1,20 @@
-# service.yaml — Minimal Kubernetes Service manifest
-# Exposes the edusaas-backend Deployment within the cluster
+# service.yaml — Kubernetes Service manifest
+# Exposes the edusaas-backend Deployment within the edusaas namespace
 apiVersion: v1
 kind: Service
 metadata:
   name: edusaas-backend-svc
-  namespace: default
+  namespace: edusaas
   labels:
     app: edusaas-backend
+    app.kubernetes.io/part-of: kubecost-finops
     project: kubecost-finops
 spec:
   type: ClusterIP
   selector:
     app: edusaas-backend
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 8080

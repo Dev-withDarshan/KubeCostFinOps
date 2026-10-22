@@ -1,0 +1,53 @@
+﻿# src/k8s/monitoring/opencost-helm-values.yaml — OpenCost Helm Chart Values
+# Provides compatible, verified values for deploying OpenCost via official Helm chart:
+#   helm repo add opencost https://opencost.github.io/opencost-helm-chart
+#   helm install opencost opencost/opencost -n monitoring -f src/k8s/monitoring/opencost-helm-values.yaml
+#
+# Differences from raw manifest (src/k8s/monitoring/opencost.yaml):
+#   - Chart version wraps exporter + cost-model architecture.
+#   - Prometheus internal endpoint points to prometheus-server.monitoring.svc.cluster.local:9090.
+#   - Pinned image tag matches v1.108.1.
+
+opencost:
+  exporter:
+    image:
+      registry: quay.io
+      repository: kubecost1/kubecost-cost-model
+      tag: "v1.108.1"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    extraEnv:
+      CLUSTER_ID: "kubecost-finops-local"
+      LOG_LEVEL: "info"
+      PORT: "9003"
+      KUBECOST_QUERY_PORT: "9003"
+
+  prometheus:
+    internal:
+      enabled: true
+      serviceName: "prometheus-server"
+      namespaceName: "monitoring"
+      port: 9090
+
+  customPricing:
+    enabled: true
+    configmapName: "opencost-config"
+    costModel:
+      provider: "AWS"
+      description: "Default baseline pricing for local Kind demonstrator (AWS US-East-1 rates)"
+      CPU: "0.031611"
+      RAM: "0.004237"
+      GPU: "0.950000"
+      storage: "0.000137"
+      zoneNetwork: "0.010000"
+      regionNetwork: "0.010000"
+      internetNetwork: "0.090000"
+
+service:
+  type: ClusterIP
+  port: 9003

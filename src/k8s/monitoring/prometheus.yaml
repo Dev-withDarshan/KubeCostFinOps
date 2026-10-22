@@ -1,0 +1,231 @@
+﻿# src/k8s/monitoring/prometheus.yaml — Complete Prometheus Server Deployment, RBAC, and Scrape Configuration
+# Scrapes telemetry from cAdvisor, Kube-State-Metrics, OpenCost, and application workloads.
+# Pinned version: prom/prometheus:v2.51.0
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/version: v2.51.0
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-server
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions", "networking.k8s.io"]
+    resources:
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-server
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-server
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-server
+    namespace: monitoring
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      # 1. Scrape Prometheus server itself
+      - job_name: "prometheus"
+        static_configs:
+          - targets: ["localhost:9090"]
+
+      # 2. Scrape Kube-State-Metrics (Pod phases, requests, limits, replicas, HPA states)
+      - job_name: "kube-state-metrics"
+        static_configs:
+          - targets: ["kube-state-metrics.monitoring.svc.cluster.local:8080"]
+
+      # 3. Scrape OpenCost metrics (Cost allocations & cloud rate benchmarks)
+      - job_name: "opencost"
+        metrics_path: /metrics
+        static_configs:
+          - targets: ["opencost.monitoring.svc.cluster.local:9003"]
+
+      # 4. Scrape cAdvisor metrics (Container CPU cores, memory bytes, network, disk)
+      - job_name: "kubernetes-nodes-cadvisor"
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+      # 5. Scrape Kubernetes API servers
+      - job_name: "kubernetes-apiservers"
+        kubernetes_sd_configs:
+          - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels:
+              [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+
+      # 6. Scrape application pods annotated with prometheus.io/scrape=true
+      - job_name: "kubernetes-pods"
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: (.+);(.+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: kubernetes_pod_name
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus-server
+        app.kubernetes.io/version: v2.51.0
+        app.kubernetes.io/part-of: kubecost-finops
+    spec:
+      serviceAccountName: prometheus-server
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.51.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=2h"
+            - "--web.enable-lifecycle"
+          ports:
+            - name: web
+              containerPort: 9090
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus
+            - name: storage-volume
+              mountPath: /prometheus
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+        - name: storage-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prometheus-server
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9090
+      targetPort: 9090

@@ -1,9 +1,11 @@
 """
-preprocessing.py — Data Preprocessing for Demand Forecasting
+preprocessing.py — Data Preprocessing Interface for Demand Forecasting
 
-Loads raw Prometheus / CloudWatch metrics, cleans missing values,
-engineers time-based features (hour, day-of-week, exam-period flags),
-and produces train/test splits ready for model training.
+Architectural Scope Notice:
+  This module defines the planned interface for enterprise AWS data pipelines.
+  In the current verified local prototype, operational timeseries validation,
+  chronological sorting, diurnal feature engineering, and holdout splitting are
+  actively implemented, tested, and served via `src/finops_engine/ml_forecast.py`.
 
 Part of: Kubernetes Cost Optimization Framework (BCSE355L)
 """

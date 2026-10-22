@@ -1,32 +1,76 @@
-# kubecost_config.yaml — Minimal Kubecost / OpenCost configuration
-# Reference: https://www.kubecost.com/install
+﻿# src/finops_engine/kubecost_config.yaml — Kubecost / OpenCost & Prometheus Integration Config
+# Reference: https://www.opencost.io/docs/
 
+# ==============================================================================
+# 1. OpenCost Cost Allocation Engine Configuration
+# ==============================================================================
+# RESOLUTION NOTE ON PORT MISMATCH:
+# Historical Kubecost bundled UI/API configurations assumed port 9090.
+# OpenCost (quay.io/kubecost1/kubecost-cost-model:v1.108.1) exposes its allocation
+# and metrics APIs on port 9003. This configuration standardizes on port 9003.
 kubecost:
-  # Kubecost API endpoint (cluster-internal service)
-  api_endpoint: "http://kubecost-cost-analyzer.kubecost.svc.cluster.local:9090"
+  # Cluster-internal OpenCost allocation service endpoint:
+  # In-cluster: "http://opencost.monitoring.svc.cluster.local:9003"
+  # Override with environment variable: OPENCOST_API_ENDPOINT
+  api_endpoint: "http://opencost.monitoring.svc.cluster.local:9003"
 
-  # Allocation API window (ISO 8601 duration)
+  # Local off-cluster development endpoint (via `kubectl port-forward svc/opencost -n monitoring 9003:9003`):
+  api_endpoint_local: "http://localhost:9003"
+
+  # Primary allocation compute path:
+  # OpenCost provides real-time allocation calculation at /allocation/compute
+  # and windowed historical querying at /allocation
+  allocation_path: "/allocation/compute"
+
+  # Allocation API query window (ISO 8601 duration or standard window string)
   default_window: "7d"
 
-  # Namespaces to monitor (empty list = all namespaces)
+  # Namespaces to monitor (empty list [] = all namespaces, or e.g. ["edusaas", "monitoring"])
   monitored_namespaces: []
 
-  # Cost aggregation granularity: namespace | deployment | pod
+  # Cost aggregation granularity: namespace | deployment | pod | container
   aggregation_level: "namespace"
 
+# ==============================================================================
+# 2. Prometheus Telemetry Server Configuration
+# ==============================================================================
 prometheus:
-  # Prometheus server URL used by Kubecost for metric queries
+  # Cluster-internal Prometheus server URL used by OpenCost and FinOps engine:
+  # In-cluster: "http://prometheus-server.monitoring.svc.cluster.local:9090"
+  # Override with environment variable: PROMETHEUS_SERVER_URL
   server_url: "http://prometheus-server.monitoring.svc.cluster.local:9090"
 
-  # Scrape interval aligned with Prometheus configuration
-  scrape_interval: "30s"
+  # Local off-cluster development endpoint (via `kubectl port-forward svc/prometheus-server -n monitoring 9090:9090`):
+  server_url_local: "http://localhost:9090"
 
+  # Scrape interval aligned with Prometheus server configuration (15s)
+  scrape_interval: "15s"
+
+# ==============================================================================
+# 3. FinOps Optimization Thresholds
+# ==============================================================================
 thresholds:
-  # CPU utilisation below this ratio flags a resource as idle
+  # CPU utilisation below this ratio flags a workload as underutilized/idle (10%)
   idle_cpu_ratio: 0.10
 
-  # Memory utilisation below this ratio flags a resource as idle
+  # Memory utilisation below this ratio flags a workload as underutilized/idle (10%)
   idle_memory_ratio: 0.10
 
-  # Minimum monthly cost (USD) to include a resource in recommendations
+  # Minimum monthly cost (USD) to include a resource in rightsizing recommendations
   min_cost_threshold: 1.00
+
+  # Target headroom multiplier for rightsizing recommendations (e.g. 1.20 = 20% safety buffer)
+  headroom_multiplier: 1.20
+
+# ==============================================================================
+# 4. Pricing Model & Environment Attribution
+# ==============================================================================
+# HONESTY DISCLOSURE:
+# Local Kind clusters operate using an offline synthetic rate-card model (AWS US-East-1 on-demand baseline:
+# $0.031611/core-hr, $0.004237/GiB-RAM-hr). This enables deterministic, reproducible allocation
+# benchmarking without requiring live AWS Cost and Usage Reports (CUR) or IAM billing credentials.
+pricing:
+  environment: "local-kind"
+  provider: "AWS"
+  rate_model: "synthetic-ratecard-us-east-1"
+  live_billing_integration: false

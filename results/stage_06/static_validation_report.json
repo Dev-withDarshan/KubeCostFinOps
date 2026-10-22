@@ -1,0 +1,136 @@
+{
+  "timestamp": "2026-10-20T14:07:17.373741+00:00",
+  "stage": "stage_06_monitoring_setup",
+  "validation_level": "Level A - Static Validation",
+  "manifest_checks": {
+    "kind-config.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "src/k8s/namespace.yaml": {
+      "status": "PASS",
+      "details": "4 document(s) parsed successfully"
+    },
+    "src/k8s/monitoring/ksm.yaml": {
+      "status": "PASS",
+      "details": "5 document(s) parsed successfully"
+    },
+    "src/k8s/monitoring/prometheus.yaml": {
+      "status": "PASS",
+      "details": "6 document(s) parsed successfully"
+    },
+    "src/k8s/monitoring/opencost.yaml": {
+      "status": "PASS",
+      "details": "6 document(s) parsed successfully"
+    },
+    "src/k8s/monitoring/opencost-helm-values.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "src/k8s/monitoring/metrics-server.yaml": {
+      "status": "PASS",
+      "details": "9 document(s) parsed successfully"
+    },
+    "src/k8s/deployment.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "src/k8s/service.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "src/k8s/hpa.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "src/k8s/ingress.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "monitoring/prometheus_config.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "src/finops_engine/kubecost_config.yaml": {
+      "status": "PASS",
+      "details": "1 document(s) parsed successfully"
+    },
+    "embedded_prometheus_yml": {
+      "status": "PASS",
+      "details": "Valid YAML. Scrape jobs: ['prometheus', 'kube-state-metrics', 'opencost', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-pods']"
+    },
+    "embedded_opencost_pricing_json": {
+      "status": "PASS",
+      "details": "Valid JSON. Provider: AWS"
+    }
+  },
+  "cross_reference_checks": {
+    "opencost_to_prometheus_dns": {
+      "status": "PASS",
+      "details": "Endpoint matches service: http://prometheus-server.monitoring.svc.cluster.local:9090"
+    },
+    "prometheus_scrapes_ksm": {
+      "status": "PASS",
+      "details": "Target: kube-state-metrics.monitoring.svc.cluster.local:8080"
+    },
+    "prometheus_scrapes_opencost": {
+      "status": "PASS",
+      "details": "Target: opencost.monitoring.svc.cluster.local:9003"
+    },
+    "finops_config_opencost_endpoint": {
+      "status": "PASS",
+      "details": "Endpoint: http://opencost.monitoring.svc.cluster.local:9003"
+    },
+    "finops_config_prometheus_endpoint": {
+      "status": "PASS",
+      "details": "Endpoint: http://prometheus-server.monitoring.svc.cluster.local:9090"
+    }
+  },
+  "rbac_checks": {
+    "ksm_rbac_binding": {
+      "status": "PASS",
+      "details": "SA kube-state-metrics cleanly bound to CR kube-state-metrics and Deployment"
+    },
+    "prometheus_rbac_binding": {
+      "status": "PASS",
+      "details": "SA prometheus-server cleanly bound to CR prometheus-server and Deployment"
+    },
+    "opencost_rbac_binding": {
+      "status": "PASS",
+      "details": "SA opencost cleanly bound to CR opencost and Deployment"
+    }
+  },
+  "resource_sizing_checks": {
+    "ksm": {
+      "status": "PASS",
+      "details": "Requests: {'cpu': '50m', 'memory': '64Mi'}, Limits: {'cpu': '200m', 'memory': '128Mi'}"
+    },
+    "prometheus": {
+      "status": "PASS",
+      "details": "Requests: {'cpu': '100m', 'memory': '256Mi'}, Limits: {'cpu': '500m', 'memory': '512Mi'}"
+    },
+    "opencost": {
+      "status": "PASS",
+      "details": "Requests: {'cpu': '100m', 'memory': '128Mi'}, Limits: {'cpu': '500m', 'memory': '512Mi'}"
+    }
+  },
+  "image_version_checks": {
+    "ksm": {
+      "status": "PASS",
+      "details": "Image matches: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0"
+    },
+    "prometheus": {
+      "status": "PASS",
+      "details": "Image matches: prom/prometheus:v2.51.0"
+    },
+    "opencost": {
+      "status": "PASS",
+      "details": "Image matches: quay.io/kubecost1/kubecost-cost-model:v1.108.1"
+    }
+  },
+  "summary": {
+    "total": 29,
+    "passed": 29,
+    "failed": 0
+  }
+}

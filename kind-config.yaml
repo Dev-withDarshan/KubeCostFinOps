@@ -1,0 +1,50 @@
+﻿# kind-config.yaml — Reproducible local development Kubernetes cluster configuration
+# Optimized for KubeCostFinOps monitoring & FinOps intelligence stack
+# Designed to run safely on memory-constrained developer workstations (<= 16GB RAM)
+# Reference: https://kind.sigs.k8s.io/docs/user/quick-start/
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kubecost-finops-local
+
+networking:
+  disableDefaultCNI: false
+  podSubnet: "10.244.0.0/16"
+  serviceSubnet: "10.96.0.0/12"
+
+nodes:
+  # Single control-plane node topology:
+  # In Kind, single-node clusters automatically untaint the control plane,
+  # allowing monitoring and educational workloads to run on a single ~1GB RAM footprint.
+  - role: control-plane
+    image: kindest/node:v1.29.2
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # Ingress HTTP
+      - containerPort: 80
+        hostPort: 8080
+        protocol: TCP
+      # Ingress HTTPS
+      - containerPort: 443
+        hostPort: 8443
+        protocol: TCP
+      # Prometheus direct access (NodePort fallback)
+      - containerPort: 30090
+        hostPort: 9090
+        protocol: TCP
+      # OpenCost direct access (NodePort fallback)
+      - containerPort: 30093
+        hostPort: 9003
+        protocol: TCP
+
+# Optional: To enable a multi-worker topology on machines with >= 32GB RAM,
+# uncomment the worker node definitions below:
+#  - role: worker
+#    image: kindest/node:v1.29.2
+#  - role: worker
+#    image: kindest/node:v1.29.2

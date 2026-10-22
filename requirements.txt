@@ -1,0 +1,18 @@
+﻿# KubeCostFinOps — Python Dependencies
+# Pinned versions for reproducibility across Windows and Linux/WSL environments
+
+# Core Data Processing and Analysis
+pandas>=2.2.0,<=3.0.5
+numpy>=1.26.0,<=2.5.2
+python-dateutil>=2.8.2
+pyyaml>=6.0.1
+
+# Machine Learning & Demand Forecasting
+scikit-learn>=1.4.0,<=1.9.0
+scipy>=1.12.0,<=1.18.1
+
+# Telemetry Visualization (optional/reporting)
+matplotlib>=3.8.0,<=3.11.2
+
+# Testing & Quality
+# pytest is optional as standard unittest discover is fully supported without extra dependencies

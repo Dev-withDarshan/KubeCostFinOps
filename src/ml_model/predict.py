@@ -1,10 +1,12 @@
 """
-predict.py — Inference Module for Demand Forecasting
+predict.py — Inference Module Interface for Demand Forecasting
 
-Loads a trained model and generates predictions for upcoming time windows
-to support proactive Kubernetes scaling decisions.
-
-Designed to be invoked as a SageMaker endpoint or a batch job.
+Architectural Scope Notice:
+  This module defines the planned interface for enterprise AWS SageMaker real-time
+  or serverless inference endpoints. In the current verified local prototype,
+  operational demand forecasting is actively implemented, tested, and served via
+  `src/finops_engine/ml_forecast.py` (Holt's Linear Trend / Exponential Smoothing
+  baseline), directly integrated into the REST API server (`src/backend/main.py`).
 
 Part of: Kubernetes Cost Optimization Framework (BCSE355L)
 """

@@ -1,0 +1,48 @@
+{
+  "run_id": "exp-sample-01",
+  "is_synthetic_fixture": true,
+  "fixture_classification": "SYNTHETIC TEST FIXTURE — NOT AN INDEPENDENT BENCHMARK",
+  "provenance_note": "Copied from exp-20261016-141448 exclusively for API route contract verification, error handling tests, and offline UI demonstration. Do not cite as empirical benchmark evidence.",
+  "source_experiment_run": "exp-20261016-141448",
+  "timestamp_utc": "2026-10-16T14:14:48.454350+00:00",
+  "cluster": "kubecost-finops-local",
+  "kubernetes_version": "v1.37.0",
+  "node_name": "kubecost-finops-local-control-plane",
+  "namespace": "edusaas",
+  "deployment": "edusaas-backend",
+  "service": "edusaas-backend-svc",
+  "replicas": 2,
+  "telemetry_source": "Kubelet Summary API (/stats/summary) & Kubernetes Metrics API (metrics.k8s.io)",
+  "duration_scale": 1.0,
+  "phase_plan": [
+    {
+      "name": "BASELINE",
+      "target_rps": 0.0,
+      "concurrency": 0,
+      "duration_seconds": 15.0
+    },
+    {
+      "name": "LOW_LOAD",
+      "target_rps": 10.0,
+      "concurrency": 2,
+      "duration_seconds": 20.0
+    },
+    {
+      "name": "HIGHER_LOAD",
+      "target_rps": 25.0,
+      "concurrency": 4,
+      "duration_seconds": 20.0
+    },
+    {
+      "name": "RECOVERY",
+      "target_rps": 0.0,
+      "concurrency": 0,
+      "duration_seconds": 15.0
+    }
+  ],
+  "safety_bounds": {
+    "max_concurrency": 4,
+    "max_target_rps": 35.0,
+    "max_total_duration_seconds": 80.0
+  }
+}

@@ -1,12 +1,13 @@
 # hpa.yaml — Horizontal Pod Autoscaler manifest
-# Automatically scales edusaas-backend based on CPU utilisation
+# Automatically scales edusaas-backend based on CPU utilisation in edusaas namespace
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: edusaas-backend-hpa
-  namespace: default
+  namespace: edusaas
   labels:
     app: edusaas-backend
+    app.kubernetes.io/part-of: kubecost-finops
     project: kubecost-finops
 spec:
   scaleTargetRef:

@@ -1,0 +1,189 @@
+﻿# src/k8s/monitoring/opencost.yaml — OpenCost Deployment, Service, RBAC, and Pricing ConfigMap
+# Correlates Prometheus telemetry with cloud rate cards to calculate real-time Kubernetes cost allocations.
+# Pinned version: quay.io/kubecost1/kubecost-cost-model:v1.108.1 (standard port 9003)
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: opencost
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/version: v1.108.1
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: opencost
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - pods
+      - services
+      - namespaces
+      - persistentvolumes
+      - persistentvolumeclaims
+      - configmaps
+      - endpoints
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - daemonsets
+      - deployments
+      - statefulsets
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - cronjobs
+      - jobs
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources:
+      - horizontalpodautoscalers
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opencost
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opencost
+subjects:
+  - kind: ServiceAccount
+    name: opencost
+    namespace: monitoring
+---
+# ConfigMap providing deterministic baseline on-demand cloud pricing (AWS US-East-1 m5.large equivalent)
+# Ensures offline reproducibility and predictable cost allocation without requiring AWS cloud billing credentials.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opencost-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+data:
+  default.json: |
+    {
+      "provider": "AWS",
+      "description": "Default baseline pricing for local Kind demonstrator (AWS US-East-1 rates)",
+      "CPU": "0.031611",
+      "RAM": "0.004237",
+      "GPU": "0.950000",
+      "storage": "0.000137",
+      "zoneNetwork": "0.010000",
+      "regionNetwork": "0.010000",
+      "internetNetwork": "0.090000"
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencost
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: opencost
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: opencost
+        app.kubernetes.io/version: v1.108.1
+        app.kubernetes.io/part-of: kubecost-finops
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9003"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: opencost
+      containers:
+        - name: opencost
+          image: quay.io/kubecost1/kubecost-cost-model:v1.108.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PROMETHEUS_SERVER_ENDPOINT
+              value: "http://prometheus-server.monitoring.svc.cluster.local:9090"
+            - name: PROMETHEUS_URL
+              value: "http://prometheus-server.monitoring.svc.cluster.local:9090"
+            - name: CLUSTER_ID
+              value: "kubecost-finops-local"
+            - name: PORT
+              value: "9003"
+            - name: KUBECOST_QUERY_PORT
+              value: "9003"
+            - name: CONFIG_PATH
+              value: "/var/configs"
+            - name: LOG_LEVEL
+              value: "info"
+          ports:
+            - name: http
+              containerPort: 9003
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9003
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 9003
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /var/configs
+      volumes:
+        - name: config-volume
+          configMap:
+            name: opencost-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opencost
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: opencost
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9003
+      targetPort: 9003

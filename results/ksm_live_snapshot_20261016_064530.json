@@ -1,0 +1,300 @@
+{
+  "metadata": {
+    "schema_version": "1.0.0",
+    "data_source": "Kube-State-Metrics (HTTP Prometheus Exposition)",
+    "collection_timestamp_utc": "2026-10-16T06:45:30.958561+00:00",
+    "source_endpoint": "http://127.0.0.1:8080/metrics",
+    "collection_status": "SUCCESS",
+    "payload_bytes": 123606,
+    "observed_container_count": 8,
+    "financial_disclaimer": "Modeled request-based financial estimates calculated using public AWS US-East-1 on-demand reference rates (m5.large equivalent: $0.031611/vCPU-hr, $0.004237/GB-RAM-hr, 730 operational hours/month). These do NOT represent actual cloud billing invoices, in-cluster OpenCost allocations, or measured real-time utilization."
+  },
+  "observed_k8s_state": {
+    "nodes": [
+      {
+        "name": "kubecost-finops-local-control-plane",
+        "conditions": {
+          "MemoryPressure": "false",
+          "DiskPressure": "false",
+          "PIDPressure": "false",
+          "Ready": "true"
+        }
+      }
+    ],
+    "namespaces": [
+      "kube-system",
+      "monitoring"
+    ],
+    "deployments": {
+      "kube-system/coredns": 2,
+      "local-path-storage/local-path-provisioner": 1,
+      "monitoring/kube-state-metrics": 1
+    },
+    "container_count": 8,
+    "total_requested_cpu_cores": 1.0,
+    "total_requested_memory_bytes": 371195904,
+    "total_requested_memory_gb": 0.3457,
+    "containers": [
+      {
+        "namespace": "kube-system",
+        "pod": "coredns-559f6c778d-n828f",
+        "container": "coredns",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "10.244.0.4",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.1,
+        "memory_request_bytes": 73400320,
+        "memory_request_gb": 0.0684,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 178257920,
+        "memory_limit_gb": 0.166
+      },
+      {
+        "namespace": "kube-system",
+        "pod": "coredns-559f6c778d-tddx8",
+        "container": "coredns",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "10.244.0.3",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.1,
+        "memory_request_bytes": 73400320,
+        "memory_request_gb": 0.0684,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 178257920,
+        "memory_limit_gb": 0.166
+      },
+      {
+        "namespace": "kube-system",
+        "pod": "etcd-kubecost-finops-local-control-plane",
+        "container": "etcd",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "172.18.0.2",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.1,
+        "memory_request_bytes": 104857600,
+        "memory_request_gb": 0.0977,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 0,
+        "memory_limit_gb": 0.0
+      },
+      {
+        "namespace": "kube-system",
+        "pod": "kindnet-k9frn",
+        "container": "kindnet-cni",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "172.18.0.2",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.1,
+        "memory_request_bytes": 52428800,
+        "memory_request_gb": 0.0488,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 0,
+        "memory_limit_gb": 0.0
+      },
+      {
+        "namespace": "kube-system",
+        "pod": "kube-apiserver-kubecost-finops-local-control-plane",
+        "container": "kube-apiserver",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "172.18.0.2",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.25,
+        "memory_request_bytes": 0,
+        "memory_request_gb": 0.0,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 0,
+        "memory_limit_gb": 0.0
+      },
+      {
+        "namespace": "kube-system",
+        "pod": "kube-controller-manager-kubecost-finops-local-control-plane",
+        "container": "kube-controller-manager",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "172.18.0.2",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.2,
+        "memory_request_bytes": 0,
+        "memory_request_gb": 0.0,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 0,
+        "memory_limit_gb": 0.0
+      },
+      {
+        "namespace": "kube-system",
+        "pod": "kube-scheduler-kubecost-finops-local-control-plane",
+        "container": "kube-scheduler",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "172.18.0.2",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.1,
+        "memory_request_bytes": 0,
+        "memory_request_gb": 0.0,
+        "cpu_limit_cores": 0.0,
+        "memory_limit_bytes": 0,
+        "memory_limit_gb": 0.0
+      },
+      {
+        "namespace": "monitoring",
+        "pod": "kube-state-metrics-5ccbbf846b-sxzp5",
+        "container": "kube-state-metrics",
+        "node": "kubecost-finops-local-control-plane",
+        "host_ip": "172.18.0.2",
+        "pod_ip": "10.244.0.5",
+        "pod_phase": "Unknown",
+        "cpu_request_cores": 0.05,
+        "memory_request_bytes": 67108864,
+        "memory_request_gb": 0.0625,
+        "cpu_limit_cores": 0.2,
+        "memory_limit_bytes": 134217728,
+        "memory_limit_gb": 0.125
+      }
+    ]
+  },
+  "modeled_financial_estimates": {
+    "pricing_reference": "AWS US-East-1 on-demand baseline rates (m5.large equivalent)",
+    "total_hourly_cost_usd": 0.033,
+    "total_monthly_cost_usd": 24.15,
+    "namespace_costs": {
+      "kube-system": {
+        "hourly": 0.0312,
+        "monthly": 22.8,
+        "cpu_cores": 0.95,
+        "memory_gb": 0.283
+      },
+      "monitoring": {
+        "hourly": 0.0018,
+        "monthly": 1.35,
+        "cpu_cores": 0.05,
+        "memory_gb": 0.062
+      }
+    },
+    "financial_classification": "MODELED_REQUEST_ESTIMATE",
+    "disclaimer": "Modeled request-based financial estimates calculated using public AWS US-East-1 on-demand reference rates (m5.large equivalent: $0.031611/vCPU-hr, $0.004237/GB-RAM-hr, 730 operational hours/month). These do NOT represent actual cloud billing invoices, in-cluster OpenCost allocations, or measured real-time utilization."
+  },
+  "simulated_rightsizing_estimates": {
+    "total_recommendations": 8,
+    "projected_monthly_savings_usd": 16.67,
+    "simulation_note": "Simulated request-downsizing with 20% safety buffer above peak; not realized billing savings.",
+    "recommendations": [
+      {
+        "workload": "coredns-559f6c778d-n828f/coredns",
+        "namespace": "kube-system",
+        "container": "coredns",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.1,
+        "proposed_cpu_request": 0.03,
+        "current_memory_request_gb": 0.068,
+        "proposed_memory_request_gb": 0.033,
+        "cpu_savings_cores": 0.07,
+        "memory_savings_gb": 0.035,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 1.72
+      },
+      {
+        "workload": "coredns-559f6c778d-tddx8/coredns",
+        "namespace": "kube-system",
+        "container": "coredns",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.1,
+        "proposed_cpu_request": 0.03,
+        "current_memory_request_gb": 0.068,
+        "proposed_memory_request_gb": 0.033,
+        "cpu_savings_cores": 0.07,
+        "memory_savings_gb": 0.035,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 1.72
+      },
+      {
+        "workload": "etcd-kubecost-finops-local-control-plane/etcd",
+        "namespace": "kube-system",
+        "container": "etcd",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.1,
+        "proposed_cpu_request": 0.03,
+        "current_memory_request_gb": 0.098,
+        "proposed_memory_request_gb": 0.047,
+        "cpu_savings_cores": 0.07,
+        "memory_savings_gb": 0.051,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 1.77
+      },
+      {
+        "workload": "kindnet-k9frn/kindnet-cni",
+        "namespace": "kube-system",
+        "container": "kindnet-cni",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.1,
+        "proposed_cpu_request": 0.03,
+        "current_memory_request_gb": 0.049,
+        "proposed_memory_request_gb": 0.032,
+        "cpu_savings_cores": 0.07,
+        "memory_savings_gb": 0.017,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 1.67
+      },
+      {
+        "workload": "kube-apiserver-kubecost-finops-local-control-plane/kube-apiserver",
+        "namespace": "kube-system",
+        "container": "kube-apiserver",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.25,
+        "proposed_cpu_request": 0.075,
+        "current_memory_request_gb": 0.0,
+        "proposed_memory_request_gb": 0.032,
+        "cpu_savings_cores": 0.175,
+        "memory_savings_gb": 0.0,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 4.04
+      },
+      {
+        "workload": "kube-controller-manager-kubecost-finops-local-control-plane/kube-controller-manager",
+        "namespace": "kube-system",
+        "container": "kube-controller-manager",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.2,
+        "proposed_cpu_request": 0.06,
+        "current_memory_request_gb": 0.0,
+        "proposed_memory_request_gb": 0.032,
+        "cpu_savings_cores": 0.14,
+        "memory_savings_gb": 0.0,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 3.23
+      },
+      {
+        "workload": "kube-scheduler-kubecost-finops-local-control-plane/kube-scheduler",
+        "namespace": "kube-system",
+        "container": "kube-scheduler",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.1,
+        "proposed_cpu_request": 0.03,
+        "current_memory_request_gb": 0.0,
+        "proposed_memory_request_gb": 0.032,
+        "cpu_savings_cores": 0.07,
+        "memory_savings_gb": 0.0,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 1.62
+      },
+      {
+        "workload": "kube-state-metrics-5ccbbf846b-sxzp5/kube-state-metrics",
+        "namespace": "monitoring",
+        "container": "kube-state-metrics",
+        "action": "DOWNSIZE_REQUESTS",
+        "current_cpu_request": 0.05,
+        "proposed_cpu_request": 0.015,
+        "current_memory_request_gb": 0.062,
+        "proposed_memory_request_gb": 0.032,
+        "cpu_savings_cores": 0.035,
+        "memory_savings_gb": 0.03,
+        "safety_buffer_pct": 20,
+        "projected_monthly_savings_usd": 0.9
+      }
+    ]
+  }
+}

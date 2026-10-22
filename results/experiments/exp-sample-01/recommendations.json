@@ -1,0 +1,57 @@
+{
+  "status": "RECOMMENDED",
+  "action": "DOWNSIZE_REQUESTS",
+  "workload": "edusaas-backend",
+  "namespace": "edusaas",
+  "replicas": 2,
+  "preservation_guarantee": "Minimum 2 replicas preserved for high availability in educational SaaS",
+  "current_specifications": {
+    "cpu_request_cores_per_replica": 0.25,
+    "memory_request_gib_per_replica": 0.25,
+    "cpu_limit_cores_per_replica": 0.5,
+    "memory_limit_gib_per_replica": 0.5,
+    "total_requested_cpu_cores": 0.5,
+    "total_requested_memory_gib": 0.5
+  },
+  "empirical_telemetry_evidence": {
+    "total_samples": 36,
+    "peak_observed_cpu_millicores": 15.16,
+    "p95_observed_cpu_millicores": 15.16,
+    "avg_observed_cpu_millicores": 3.13,
+    "peak_observed_cpu_cores": 0.0152,
+    "peak_observed_cpu_utilization_ratio": 0.0606,
+    "peak_observed_cpu_utilization_pct": 6.06,
+    "peak_observed_memory_mib": 6.45,
+    "p95_observed_memory_mib": 6.45,
+    "avg_observed_memory_mib": 3.91,
+    "peak_observed_memory_gib": 0.0063,
+    "peak_observed_memory_utilization_ratio": 0.0252,
+    "peak_observed_memory_utilization_pct": 2.52
+  },
+  "recommendation_logic": {
+    "safety_buffer_pct": 20,
+    "cpu_safety_floor_cores": 0.05,
+    "memory_safety_floor_gib": 0.0625,
+    "proposed_cpu_request_cores_per_replica": 0.05,
+    "proposed_memory_request_gib_per_replica": 0.0625,
+    "proposed_cpu_limit_cores_per_replica": 0.1,
+    "proposed_memory_limit_gib_per_replica": 0.125,
+    "total_proposed_cpu_cores": 0.1,
+    "total_proposed_memory_gib": 0.125
+  },
+  "modeled_financial_impact": {
+    "pricing_reference": "AWS US-East-1 On-Demand Baseline ($0.031611/vCPU-hr, $0.004237/GB-hr, 730 hrs/month)",
+    "current_modeled_monthly_cost_usd": 13.08,
+    "proposed_modeled_monthly_cost_usd": 2.69,
+    "projected_monthly_savings_usd": 10.39,
+    "savings_percentage": 79.4,
+    "modeled_annual_savings_usd": 124.68,
+    "disclaimer": "Modeled estimate based on empirical workload utilization. Dry-run simulation only; no Kubernetes manifests or pods were mutated."
+  },
+  "limitations_and_safeguards": [
+    "Measurements were obtained under bounded controlled synthetic HTTP traffic; exam rushes may exhibit higher peak spikes.",
+    "Horizontal Pod Autoscaling (HPA) should be deployed alongside rightsized requests to provide automated elasticity.",
+    "Spot-instance savings remain a modeled theoretical assumption and were not evaluated in this local Kind cluster."
+  ],
+  "sample_note": "Reference historical benchmark baseline sample"
+}

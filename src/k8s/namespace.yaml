@@ -1,0 +1,57 @@
+# src/k8s/namespace.yaml — Dedicated Namespaces and Quotas for KubeCostFinOps
+# Establishes workload isolation between educational applications and FinOps monitoring components.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: edusaas
+  labels:
+    name: edusaas
+    app.kubernetes.io/part-of: kubecost-finops
+    project: kubecost-finops
+---
+# ResourceQuota for edusaas namespace: Prevents runaway resource consumption
+# while guaranteeing sufficient headroom for the planned 10-pod high-surge HPA experiment
+# (10 pods * 250m = 2.5 CPU requests, 10 pods * 500m = 5.0 CPU limits).
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: edusaas-quota
+  namespace: edusaas
+  labels:
+    app.kubernetes.io/part-of: kubecost-finops
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: "4Gi"
+    limits.cpu: "8"
+    limits.memory: "8Gi"
+    pods: "20"
+---
+# LimitRange for edusaas namespace: Provides default requests and limits for pods
+# deployed without explicit resource declarations, ensuring ResourceQuota admission compliance.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: edusaas-limits
+  namespace: edusaas
+  labels:
+    app.kubernetes.io/part-of: kubecost-finops
+spec:
+  limits:
+    - default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      type: Container

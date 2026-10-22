@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="KubeCostFinOps — Kubernetes Cost Optimization & Resource Intelligence Platform">
+  <title>KubeCostFinOps — Kubernetes FinOps Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">KubeCostFinOps</h1>
+          <span class="brand-tag">Cloud FinOps Intelligence &bull; BCSE355L</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="cluster-badge">
+          <span class="pulse-dot" id="headerClusterDot" aria-hidden="true"></span>
+          <span id="headerClusterName">Cluster: kubecost-finops-local</span>
+        </div>
+
+        <div class="api-status-widget" id="apiStatusWidget" title="Backend API Health">
+          <span class="status-indicator" id="apiStatusIndicator"></span>
+          <span class="status-label" id="apiStatusText">Checking API...</span>
+          <span class="status-latency" id="apiLatencyText"></span>
+        </div>
+
+        <button class="btn btn-secondary btn-icon" id="btnRefreshAll" title="Refresh all telemetry data">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span>Refresh</span>
+        </button>
+
+        <button class="btn btn-ghost btn-icon" id="btnToggleSettings" title="API Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Settings Panel (Collapsible) -->
+  <aside class="settings-drawer" id="settingsDrawer" hidden>
+    <div class="settings-drawer-content">
+      <div class="settings-header">
+        <h3>Configuration &amp; API Endpoint</h3>
+        <button class="btn-close" id="btnCloseSettings" aria-label="Close settings">&times;</button>
+      </div>
+      <div class="settings-body">
+        <label for="inputApiBaseUrl" class="form-label">Backend API Base URL:</label>
+        <div class="input-group">
+          <input type="text" id="inputApiBaseUrl" class="form-control" value="http://127.0.0.1:8000" placeholder="e.g. http://127.0.0.1:8000">
+          <button class="btn btn-primary" id="btnSaveApiUrl">Apply</button>
+        </div>
+        <p class="form-help">Default uses the local lightweight Python API server running on port 8000.</p>
+        
+        <div class="settings-divider"></div>
+        <h4>Simulation Parameters</h4>
+        <label for="inputBufferPct" class="form-label">Rightsizing Safety Buffer:</label>
+        <select id="inputBufferPct" class="form-control">
+          <option value="0.10">10% Safety Buffer (Aggressive)</option>
+          <option value="0.20" selected>20% Safety Buffer (Balanced Baseline)</option>
+          <option value="0.30">30% Safety Buffer (Conservative)</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Global Alert Banner for Backend Offline / Degradation -->
+  <div class="alert-banner" id="globalAlertBanner" hidden>
+    <div class="alert-icon" aria-hidden="true">⚠️</div>
+    <div class="alert-content">
+      <strong id="alertBannerTitle">Backend Offline:</strong>
+      <span id="alertBannerMsg">Unable to connect to the FinOps API server. Please verify the server is running at <code>http://127.0.0.1:8000</code>.</span>
+    </div>
+    <button class="btn btn-sm btn-secondary" id="btnRetryAlert">Retry Connection</button>
+  </div>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    
+    <!-- SECTION 1: SYSTEM OVERVIEW & PROVENANCE BANNER -->
+    <section class="dashboard-section section-overview" id="sectionOverview">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Telemetry Overview &amp; Cluster Health</h2>
+          <p class="section-subtitle">Real-time object-state telemetry ingested from in-cluster Kube-State-Metrics endpoint</p>
+        </div>
+        <div class="freshness-indicator" id="dataFreshnessWidget">
+          <span class="badge badge-info" id="badgeSnapshotSource">Source: Kube-State-Metrics</span>
+          <span class="badge badge-neutral" id="badgeSnapshotTime">Captured: Checking...</span>
+        </div>
+      </div>
+
+      <!-- Overview Metric KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card" id="cardKpiNodes">
+          <div class="kpi-header">
+            <span class="kpi-label">Observed Nodes</span>
+            <div class="kpi-icon icon-nodes">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                <line x1="6" y1="6" x2="6.01" y2="6"/>
+                <line x1="6" y1="18" x2="6.01" y2="18"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="kpiNodeCount">--</div>
+          <div class="kpi-footer">
+            <span class="status-pill status-pill-success" id="kpiNodeStatus">Ready: 100%</span>
+            <span class="kpi-subtext" id="kpiNodeSubtext">Cluster: Kind v1.37.0</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" id="cardKpiContainers">
+          <div class="kpi-header">
+            <span class="kpi-label">Active Container Specs</span>
+            <div class="kpi-icon icon-containers">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="kpiContainerCount">--</div>
+          <div class="kpi-footer">
+            <span class="status-pill status-pill-info" id="kpiNamespacesCount">-- Namespaces</span>
+            <span class="kpi-subtext" id="kpiDeploymentsCount">-- Deployments</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" id="cardKpiMonthlyCost">
+          <div class="kpi-header">
+            <span class="kpi-label">Modeled Baseline Cost</span>
+            <div class="kpi-icon icon-cost">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="kpiMonthlyCost">$0.00<span class="kpi-unit">/mo</span></div>
+          <div class="kpi-footer">
+            <span class="badge badge-warning" title="Calculated from container requests, not actual bills">MODELED ESTIMATE</span>
+            <span class="kpi-subtext" id="kpiHourlyCost">$0.0000 / hr</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" id="cardKpiSavings">
+          <div class="kpi-header">
+            <span class="kpi-label">Simulated Savings Potential</span>
+            <div class="kpi-icon icon-savings">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value text-accent-green" id="kpiSavingsAmount">$0.00<span class="kpi-unit">/mo</span></div>
+          <div class="kpi-footer">
+            <span class="status-pill status-pill-success" id="kpiSavingsPercent">--% Reduction</span>
+            <span class="kpi-subtext" id="kpiSavingsWorkloads">Across -- workloads</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: COST INTELLIGENCE & ALLOCATION -->
+    <section class="dashboard-section section-cost" id="sectionCost">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Cost Intelligence &amp; Allocation</h2>
+          <p class="section-subtitle">Financial breakdown modeled from requested container capacity (AWS US-East-1 on-demand baseline)</p>
+        </div>
+        <div>
+          <span class="badge badge-neutral" id="badgePricingModel">m5.large Reference Rates</span>
+        </div>
+      </div>
+
+      <!-- Disclaimer Banner -->
+      <div class="notice-box notice-warning">
+        <div class="notice-icon">ℹ️</div>
+        <div class="notice-body">
+          <strong>Academic &amp; Operational Financial Disclosure:</strong>
+          <span id="textCostDisclaimer">Modeled request-based financial estimates calculated using public AWS US-East-1 on-demand reference rates ($0.031611/vCPU-hr, $0.004237/GB-RAM-hr, 730 operational hours/month). These do NOT represent actual cloud billing invoices, in-cluster OpenCost allocations, or measured real-time utilization.</span>
+        </div>
+      </div>
+
+      <div class="grid-two-columns">
+        <!-- Namespace Allocation Chart & List -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Namespace Cost Breakdown</h3>
+            <span class="panel-badge" id="nsCountBadge">2 Namespaces</span>
+          </div>
+          <div class="panel-body">
+            <!-- Visual CSS/SVG Bar Allocation -->
+            <div class="chart-container" id="nsChartContainer">
+              <div class="ns-bar-track" id="nsBarTrack" aria-label="Namespace Cost Distribution">
+                <!-- Injected via app.js -->
+              </div>
+              <div class="ns-bar-legend" id="nsBarLegend">
+                <!-- Legend items injected via app.js -->
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table" id="tableNamespaceCosts">
+                <thead>
+                  <tr>
+                    <th>Namespace</th>
+                    <th>CPU Cores</th>
+                    <th>RAM (GiB)</th>
+                    <th>Hourly ($)</th>
+                    <th>Monthly ($)</th>
+                    <th>Share</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyNamespaceCosts">
+                  <tr><td colspan="6" class="text-center text-muted">Loading cost allocation...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resource Request Totals & Capacity Pool -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Resource Request Capacity Pool</h3>
+            <span class="panel-badge">Specification Totals</span>
+          </div>
+          <div class="panel-body">
+            <div class="resource-meters">
+              <div class="meter-block">
+                <div class="meter-header">
+                  <span class="meter-title">Requested CPU Cores</span>
+                  <span class="meter-val" id="meterCpuVal">1.000 Cores</span>
+                </div>
+                <div class="meter-bar-outer">
+                  <div class="meter-bar-fill fill-cpu" id="meterCpuBar" style="width: 50%;"></div>
+                </div>
+                <div class="meter-footer">
+                  <span>Simulated Reference: $0.0316 / vCPU-hr</span>
+                  <span id="meterCpuCostEst">$23.08 / mo</span>
+                </div>
+              </div>
+
+              <div class="meter-block">
+                <div class="meter-header">
+                  <span class="meter-title">Requested Memory RAM</span>
+                  <span class="meter-val" id="meterMemVal">0.346 GiB</span>
+                </div>
+                <div class="meter-bar-outer">
+                  <div class="meter-bar-fill fill-mem" id="meterMemBar" style="width: 35%;"></div>
+                </div>
+                <div class="meter-footer">
+                  <span>Simulated Reference: $0.0042 / GB-hr</span>
+                  <span id="meterMemCostEst">$1.07 / mo</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="spec-highlight-box">
+              <h4>Container Specifications Observed</h4>
+              <p>The cluster currently hosts <strong id="specHighlightContainers">8 container specifications</strong> in <strong id="specHighlightNamespaces">kube-system</strong> and <strong id="specHighlightMonitoring">monitoring</strong> namespaces.</p>
+              <div class="spec-tag-list" id="specTagList">
+                <span class="spec-tag">coredns</span>
+                <span class="spec-tag">etcd</span>
+                <span class="spec-tag">kindnet-cni</span>
+                <span class="spec-tag">kube-apiserver</span>
+                <span class="spec-tag">kube-controller-manager</span>
+                <span class="spec-tag">kube-scheduler</span>
+                <span class="spec-tag">kube-state-metrics</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: FINOPS RECOMMENDATIONS -->
+    <section class="dashboard-section section-recommendations" id="sectionRecommendations">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">FinOps Optimization &amp; Rightsizing</h2>
+          <p class="section-subtitle">Simulated rightsizing and Horizontal Pod Autoscaling (HPA) recommendations</p>
+        </div>
+        <div class="filter-btn-group" role="tablist">
+          <button class="filter-btn active" id="tabRecsAll" role="tab" data-filter="all">All Recommendations (<span id="countRecsAll">0</span>)</button>
+          <button class="filter-btn" id="tabRecsRightsizing" role="tab" data-filter="rightsizing">Rightsizing (<span id="countRecsRightsizing">0</span>)</button>
+          <button class="filter-btn" id="tabRecsHpa" role="tab" data-filter="hpa">HPA Tuning (<span id="countRecsHpa">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="notice-box notice-info">
+        <div class="notice-icon">🛡️</div>
+        <div class="notice-body">
+          <strong>Dry-Run Read-Only Mode Active:</strong>
+          <span>Recommendations are calculated for proactive capacity planning and academic evaluation. The KubeCostFinOps engine strictly avoids executing unapproved Kubernetes mutation or pod eviction actions.</span>
+        </div>
+      </div>
+
+      <!-- Recommendation Cards Grid -->
+      <div class="recommendations-grid" id="recommendationsContainer">
+        <!-- Injected via app.js -->
+        <div class="empty-state">
+          <p>Loading recommendations...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: CONTROLLED FINOPS EXPERIMENT BENCHMARK -->
+    <section class="dashboard-section section-experiment" id="sectionExperiment">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Controlled Kubernetes FinOps Experiment</h2>
+          <p class="section-subtitle">Empirical 4-phase benchmark: Telemetry &rarr; Utilization &rarr; Recommendation &rarr; Dry-Run Simulation</p>
+        </div>
+        <div class="header-controls">
+          <span class="tag tag-model" id="expRunIdBadge">Run: --</span>
+          <span class="tag tag-mae" id="expTimestampBadge">Captured: --</span>
+        </div>
+      </div>
+
+      <!-- Provenance Matrix Banner -->
+      <div class="notice-box notice-info" id="expProvenanceBanner">
+        <div class="notice-icon">🔬</div>
+        <div class="notice-body">
+          <strong>Measured Kernel Utilization vs Configured Spec:</strong>
+          <span>Real Linux cgroups telemetry captured via Kubelet Summary API (<code>/stats/summary</code>) and Metrics Server. Evaluates the live path: <em>Telemetry &rarr; Utilization Analysis &rarr; FinOps Recommendation &rarr; Dry-Run Simulation</em>.</span>
+        </div>
+      </div>
+
+      <!-- Experiment Results Container -->
+      <div id="experimentContent">
+        <div class="empty-state">
+          <p>Loading experiment benchmark data...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: DEMAND FORECASTING ENGINE -->
+    <section class="dashboard-section section-forecasting" id="sectionForecasting">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Resource Demand &amp; Workload Forecasting</h2>
+          <p class="section-subtitle">Statistical trend extrapolation using Holt's Linear Trend baseline with 95% confidence intervals</p>
+        </div>
+        <div class="forecast-source-toggle">
+          <span class="toggle-label">Data Source:</span>
+          <button class="toggle-btn active" id="btnForecastSourceSynthetic" data-source="synthetic">Synthetic Demo</button>
+          <button class="toggle-btn" id="btnForecastSourceLive" data-source="live">Live Cluster History</button>
+        </div>
+      </div>
+
+      <!-- Dynamic Provenance Warning Banner -->
+      <div class="forecast-provenance-banner" id="forecastProvenanceBanner">
+        <div class="banner-badge" id="forecastBadge">SYNTHETIC DEMO ONLY</div>
+        <div class="banner-text" id="forecastBannerText">
+          Displaying simulated 48-hour diurnal EduSaaS university classroom traffic (exam submission bursts + Gaussian noise). Generated exclusively for algorithmic validation.
+        </div>
+      </div>
+
+      <!-- Forecast Chart Panel -->
+      <div class="panel forecast-chart-panel">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title" id="forecastChartTitle">Simulated EduSaaS API Request Rate (RPM)</h3>
+            <span class="panel-subtitle" id="forecastChartSubtitle">Model: HoltLinearTrend_Baseline &bull; Horizon: 6 hours &bull; Step: 3600s</span>
+          </div>
+          <div class="forecast-meta-tags" id="forecastMetaTags">
+            <span class="tag tag-model" id="tagModelName">Holt's Linear Trend</span>
+            <span class="tag tag-mae" id="tagEvalMae">MAE: --</span>
+            <span class="tag tag-rmse" id="tagEvalRmse">RMSE: --</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          
+          <!-- Insufficient Data State View (for live source when < 5 snapshots) -->
+          <div class="insufficient-data-view" id="insufficientDataView" hidden>
+            <div class="insufficient-icon">📊</div>
+            <h3>Insufficient Historical Telemetry</h3>
+            <p id="insufficientDataMsg">Historical timeseries contains only 2 snapshot observations. A minimum of 5 chronologically distinct snapshots is strictly required before computing statistical trend forecasts.</p>
+            <div class="insufficient-advice">
+              <strong>How to resolve:</strong> Run periodic collection via the pipeline CLI to gather historical snapshots:
+              <code>python -m src.finops_engine.pipeline --poll-interval 60</code>
+            </div>
+            <button class="btn btn-primary" id="btnSwitchToSynthetic">View Synthetic Demonstration Forecast</button>
+          </div>
+
+          <!-- Active Forecast Chart SVG View -->
+          <div class="svg-chart-wrapper" id="forecastChartWrapper">
+            <svg id="forecastSvgChart" class="forecast-svg" viewBox="0 0 800 320" preserveAspectRatio="none" aria-label="Demand Forecast Line Chart">
+              <!-- SVG chart elements dynamically drawn via app.js -->
+            </svg>
+            <div class="chart-tooltip" id="chartTooltip" hidden></div>
+          </div>
+
+          <!-- Forecast Horizon Steps Table -->
+          <div class="forecast-steps-panel" id="forecastStepsPanel">
+            <h4 class="steps-title">Projected Horizon Points</h4>
+            <div class="table-responsive">
+              <table class="data-table" id="tableForecastSteps">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Target Timestamp (UTC)</th>
+                    <th>Projected Value</th>
+                    <th>Lower Bound (95%)</th>
+                    <th>Upper Bound (95%)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyForecastSteps">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: ENGINEERING TRANSPARENCY & AUDIT LOG -->
+    <section class="dashboard-section section-transparency" id="sectionTransparency">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Engineering Transparency &amp; Provenance Matrix</h2>
+          <p class="section-subtitle">Formal disclosure of data sources, assumptions, and algorithmic limitations</p>
+        </div>
+      </div>
+
+      <div class="transparency-matrix">
+        <div class="transparency-card">
+          <div class="transparency-icon">☸️</div>
+          <h4>Observed Kubernetes State</h4>
+          <span class="badge badge-success">Live Observation</span>
+          <p>Sourced from Kube-State-Metrics exposition metrics. Captures object specifications: pod container requests/limits, phase states, and deployment replicas. Does NOT represent continuous cAdvisor kernel utilization.</p>
+        </div>
+
+        <div class="transparency-card">
+          <div class="transparency-icon">💵</div>
+          <h4>Modeled Financial Estimates</h4>
+          <span class="badge badge-warning">Simulated Formula</span>
+          <p>Computed by pairing observed container request specifications against public AWS US-East-1 reference cards ($0.031611/vCPU-hr, $0.004237/GB-RAM-hr, 730 hrs/mo). Does NOT represent realized cloud bills or OpenCost allocations.</p>
+        </div>
+
+        <div class="transparency-card">
+          <div class="transparency-icon">📈</div>
+          <h4>Demonstration Forecasting</h4>
+          <span class="badge badge-amber">Synthetic Simulation</span>
+          <p>Educational timeseries generated via diurnal trigonometric models with Gaussian noise (seed 42). Used exclusively for validating statistical smoothing pipelines without risk of misleading capacity teams.</p>
+        </div>
+      </div>
+
+      <!-- System Diagnostic Footer Card -->
+      <div class="system-diagnostic-bar">
+        <div>
+          <strong>Backend Service Endpoint:</strong> <code id="diagBackendUrl">http://127.0.0.1:8000</code> &bull;
+          <strong>API Version:</strong> <span id="diagApiVersion">1.0.0</span> &bull;
+          <strong>Active Snapshot:</strong> <span id="diagSnapshotFile">--</span>
+        </div>
+        <div class="diag-meta">
+          <span id="diagLastRefreshed">Last Refreshed: Just now</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>KubeCostFinOps Intelligence Platform &bull; Department of Cloud Computing &amp; FinOps &bull; Academic Project (BCSE355L)</p>
+      <p class="text-muted">Built with Python Standard Library, Kube-State-Metrics, and Vanilla Web Standards. Read-only architecture.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

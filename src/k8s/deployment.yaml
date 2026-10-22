@@ -1,12 +1,13 @@
-# deployment.yaml — Minimal Kubernetes Deployment manifest
-# Deploys the educational SaaS platform backend on EKS
+# deployment.yaml — Kubernetes Deployment manifest for educational SaaS workload
+# Deploys the educational SaaS platform backend in the isolated edusaas namespace
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: edusaas-backend
-  namespace: default
+  namespace: edusaas
   labels:
     app: edusaas-backend
+    app.kubernetes.io/part-of: kubecost-finops
     project: kubecost-finops
 spec:
   replicas: 2
@@ -17,12 +18,38 @@ spec:
     metadata:
       labels:
         app: edusaas-backend
+        app.kubernetes.io/part-of: kubecost-finops
+        project: kubecost-finops
+      annotations:
+        # Set to false for mock container (http-echo has no /metrics format); toggle to true when real backend is deployed
+        prometheus.io/scrape: "false"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: backend
-          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/edusaas-backend:latest  # TODO: Replace with actual ECR image URI
+          # For local Kind/Minikube testing: use public image (e.g. hashicorp/http-echo or kennethreitz/httpbin)
+          # For AWS EKS production: replace with <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/edusaas-backend:latest
+          image: hashicorp/http-echo:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-listen=:8080"
+            - "-text=EduSaaS LMS API Backend Service Online"
           ports:
             - containerPort: 8080
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
           resources:
             requests:
               cpu: "250m"
@@ -33,4 +60,5 @@ spec:
           env:
             - name: NODE_ENV
               value: "production"
-            # TODO: Add remaining environment variables (DB connection, etc.)
+            - name: APP_NAME
+              value: "edusaas-backend"

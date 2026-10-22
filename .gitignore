@@ -90,3 +90,13 @@ Desktop.ini
 .cache/
 coverage/
 .nyc_output/
+
+# ========================
+# Scratch Analysis & Temporary Caches
+# ========================
+*_dump.txt
+template_structure.txt
+extracted_final_images/
+extracted_phase1_images/
+1Submission/*.zip
+1Submission/*_BACKUP*
