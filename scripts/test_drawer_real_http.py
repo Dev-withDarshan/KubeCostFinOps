@@ -136,3 +136,4 @@ if __name__ == "__main__":
     passed = test_drawer_via_chrome()
     if not passed:
         exit(1)
+

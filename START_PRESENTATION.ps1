@@ -1,7 +1,7 @@
 # ==============================================================================
 # START_PRESENTATION.ps1 — Guaranteed Presentation Startup System
 # KubeCostFinOps: Kubernetes Cost Optimization Framework (BCSE355L)
-# Institution: VIT Vellore | Project Lead: K. Darshan
+# Institution: VIT Vellore |
 # ==============================================================================
 
 [CmdletBinding()]
@@ -16,7 +16,7 @@ $ErrorActionPreference = 'Stop'
 Write-Host ''
 Write-Host '===========================================================================' -ForegroundColor Cyan
 Write-Host '  KUBECOST FINOPS -- LIVE PRESENTATION MODE (BCSE355L EVALUATION)' -ForegroundColor Cyan
-Write-Host '  Department of Cloud Architecture | VIT Vellore | Team Lead: K. Darshan' -ForegroundColor Cyan
+Write-Host '  Department of Cloud Architecture | VIT Vellore |' -ForegroundColor Cyan
 Write-Host '===========================================================================' -ForegroundColor Cyan
 Write-Host ''
 
@@ -41,10 +41,19 @@ foreach ($f in $requiredFiles) {
 Write-Host ('[PASS] Workspace root verified: ' + $PWD) -ForegroundColor Green
 
 # 2. Check Python Runtime
+$pythonCmd = 'python'
 try {
     $pythonVer = python --version 2>&1
     Write-Host ('[PASS] Python environment verified: ' + $pythonVer) -ForegroundColor Green
-} catch {
+    $pythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source
+    if ($pythonPath) {
+        $pythonwPath = $pythonPath -replace 'python\.exe$', 'pythonw.exe'
+        if (Test-Path $pythonwPath) {
+            $pythonCmd = $pythonwPath
+        }
+    }
+}
+catch {
     Write-Host '[FAIL] Python runtime not found in PATH.' -ForegroundColor Red
     exit 1
 }
@@ -60,12 +69,29 @@ try {
         Write-Host ('[PASS] KubeCostFinOps backend is already active on port ' + $Port + '.') -ForegroundColor Green
         $alreadyRunning = $true
     }
-} catch {
+}
+catch {
     # Port not answering, start fresh
 }
 
 if (-not $alreadyRunning) {
-    # Clear any stale connection on port 8000
+    # 3a. Clean up any previous backend process from PID file
+    if (Test-Path '.backend.pid') {
+        try {
+            $prevPid = Get-Content '.backend.pid' | ForEach-Object { [int]$_ }
+            if ($prevPid -gt 0) {
+                $p = Get-Process -Id $prevPid -ErrorAction SilentlyContinue
+                if ($p -and $p.ProcessName -match 'python') {
+                    Write-Host ('[INFO] Stopping previously recorded backend PID ' + $prevPid + '...') -ForegroundColor Yellow
+                    Stop-Process -Id $prevPid -Force -ErrorAction SilentlyContinue
+                    Start-Sleep -Milliseconds 500
+                }
+            }
+        } catch {}
+        Remove-Item -Path '.backend.pid' -Force -ErrorAction SilentlyContinue
+    }
+
+    # 3b. Clear any stale connection on port 8000
     $stale = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
     if ($stale -and $stale.OwningProcess -gt 0) {
         Write-Host ('[INFO] Releasing port ' + $Port + ' from PID ' + $stale.OwningProcess + '...') -ForegroundColor Yellow
@@ -73,9 +99,9 @@ if (-not $alreadyRunning) {
         Start-Sleep -Seconds 1
     }
 
-    Write-Host ('[INFO] Launching presentation backend server on port ' + $Port + '...') -ForegroundColor Cyan
+    Write-Host ('[INFO] Launching presentation backend server on port ' + $Port + ' with ' + (Split-Path $pythonCmd -Leaf) + '...') -ForegroundColor Cyan
     $backendCmd = '-m src.backend.main --port ' + $Port + ' --host ' + $HostAddress
-    $proc = Start-Process -FilePath 'python' -ArgumentList $backendCmd -WorkingDirectory $scriptDir -WindowStyle Hidden -RedirectStandardOutput 'backend.log' -RedirectStandardError 'backend.err.log' -PassThru
+    $proc = Start-Process -FilePath $pythonCmd -ArgumentList $backendCmd -WorkingDirectory $scriptDir -WindowStyle Hidden -PassThru
 
     if (-not $proc) {
         Write-Host '[FAIL] Could not spawn backend process.' -ForegroundColor Red
@@ -97,7 +123,8 @@ if (-not $alreadyRunning) {
                 $ready = $true
                 break
             }
-        } catch {}
+        }
+        catch {}
     }
     Write-Host ''
 

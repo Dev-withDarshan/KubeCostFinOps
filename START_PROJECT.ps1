@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 Write-Host ''
 Write-Host '===========================================================================' -ForegroundColor Cyan
 Write-Host '  KUBECOST FINOPS -- ONE-COMMAND STARTUP SYSTEM (WINDOWS 11)' -ForegroundColor Cyan
-Write-Host '  BCSE355L Final Evaluation | VIT Vellore | Team Lead: K. Darshan' -ForegroundColor Cyan
+Write-Host '  BCSE355L Final Evaluation | VIT Vellore |' -ForegroundColor Cyan
 Write-Host '===========================================================================' -ForegroundColor Cyan
 Write-Host ''
 
@@ -46,7 +46,8 @@ Write-Host ('[PASS] Project root verified: ' + $PWD) -ForegroundColor Green
 try {
     $pythonVer = python --version 2>&1
     Write-Host ('[PASS] Python runtime detected: ' + $pythonVer) -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host '[FAIL] Python was not found in PATH.' -ForegroundColor Red
     Write-Host 'Please install Python 3.10+ and add it to system PATH.' -ForegroundColor Yellow
     exit 1
@@ -57,7 +58,8 @@ $depCheck = python -c "import yaml, pandas, numpy; print('DEPS_OK')" 2>&1
 if ($depCheck -notmatch 'DEPS_OK') {
     Write-Host '[WARN] Some core packages are missing. Installing from requirements.txt...' -ForegroundColor Yellow
     pip install -r requirements.txt
-} else {
+}
+else {
     Write-Host '[PASS] Core Python dependencies verified (yaml, pandas, numpy)' -ForegroundColor Green
 }
 
@@ -73,7 +75,8 @@ try {
         Write-Host ('[PASS] KubeCostFinOps API is ALREADY running and healthy on port ' + $Port + ' (avoiding duplicate process).') -ForegroundColor Green
         $alreadyRunning = $true
     }
-} catch {
+}
+catch {
     # Port is not currently responding to our ready endpoint
 }
 
@@ -116,7 +119,8 @@ if (-not $alreadyRunning) {
                 $ready = $true
                 break
             }
-        } catch {
+        }
+        catch {
             # Continue polling
         }
     }

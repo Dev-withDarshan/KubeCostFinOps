@@ -145,3 +145,4 @@ Before walking into the evaluation room:
 - [ ] Keep `docs/FINAL_VIVA_PREPARATION.md` accessible for rapid faculty Q&A lookup.
 
 **Good luck, Darshan! The project is rock solid, 100% verified, and ready for an outstanding evaluation.**
+

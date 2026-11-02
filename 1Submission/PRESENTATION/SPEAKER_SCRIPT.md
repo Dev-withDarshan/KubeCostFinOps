@@ -289,3 +289,4 @@ Thank you for your time, guidance, and evaluation. We now welcome your questions
    A single Python container backend replica has an internal single-threaded event loop concurrency ceiling. At 30 RPS, concurrent connections exhausted the HTTP socket backlog, proving that vertical rightsizing must be paired with horizontal pod autoscaling (HPA) for high-concurrency spikes.
 5. **How does Holt's Linear Trend work?**  
    It uses double exponential smoothing: level equation ($L_t$) smooths baseline consumption with $\alpha=0.35$, trend equation ($T_t$) smooths growth slope with $\beta=0.15$. Future prediction is $L_t + h \cdot T_t$, bounded by $95\%$ confidence intervals ($1.96 \cdot \text{RMSE}$).
+

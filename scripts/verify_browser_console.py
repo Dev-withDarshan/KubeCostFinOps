@@ -37,3 +37,4 @@ def test_console():
 if __name__ == "__main__":
     if not test_console():
         exit(1)
+

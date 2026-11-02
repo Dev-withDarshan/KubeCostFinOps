@@ -51,6 +51,11 @@
   padding: 0;
 }
 
+/* Universal HTML5 Hidden Attribute Guarantee */
+[hidden] {
+  display: none !important;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
@@ -193,13 +198,22 @@ code, kbd, samp, pre {
   background-color: rgba(244, 63, 94, 0.15);
   border-bottom: 1px solid rgba(244, 63, 94, 0.35);
   padding: 0.75rem 1.5rem;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   font-size: 0.875rem;
   color: #fecdd3;
   animation: slideDown 200ms ease-out;
+}
+
+.alert-banner[hidden],
+.alert-banner:not(.alert-active) {
+  display: none !important;
+}
+
+.alert-banner.alert-active:not([hidden]) {
+  display: flex !important;
 }
 
 @keyframes slideDown {
@@ -978,6 +992,10 @@ code, kbd, samp, pre {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+}
+
+.insufficient-data-view[hidden] {
+  display: none !important;
 }
 
 .insufficient-icon {

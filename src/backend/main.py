@@ -35,8 +35,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # Safe fallback for GUI/daemon/headless environments where stdout/stderr may be None or invalid
 class SafeStream:
-    def __init__(self, target=None):
+    def __init__(self, target=None, log_filename=None):
         self.target = target
+        self.log_filename = log_filename
+        self.encoding = getattr(target, "encoding", "utf-8")
+        self.errors = getattr(target, "errors", "replace")
+
     def write(self, s):
         try:
             if self.target is not None:
@@ -44,6 +48,14 @@ class SafeStream:
                 self.target.flush()
         except Exception:
             pass
+        if self.log_filename:
+            try:
+                with open(self.log_filename, "a", encoding="utf-8") as f:
+                    f.write(s)
+            except Exception:
+                pass
+        return len(s) if isinstance(s, (str, bytes)) else 0
+
     def flush(self):
         try:
             if self.target is not None:
@@ -51,21 +63,42 @@ class SafeStream:
         except Exception:
             pass
 
+    def isatty(self):
+        try:
+            if self.target is not None and hasattr(self.target, "isatty"):
+                return self.target.isatty()
+        except Exception:
+            pass
+        return False
+
+    def fileno(self):
+        try:
+            if self.target is not None and hasattr(self.target, "fileno"):
+                return self.target.fileno()
+        except Exception:
+            pass
+        raise OSError("SafeStream has no file descriptor")
+
+    def __getattr__(self, name):
+        if self.target is not None:
+            return getattr(self.target, name)
+        raise AttributeError(f"'SafeStream' object has no attribute '{name}'")
+
 try:
     if sys.stdout is None or not hasattr(sys.stdout, "write"):
-        sys.stdout = SafeStream(None)
+        sys.stdout = SafeStream(None, "backend.log")
     else:
-        sys.stdout = SafeStream(sys.stdout)
+        sys.stdout = SafeStream(sys.stdout, "backend.log")
 except Exception:
-    sys.stdout = SafeStream(None)
+    sys.stdout = SafeStream(None, "backend.log")
 
 try:
     if sys.stderr is None or not hasattr(sys.stderr, "write"):
-        sys.stderr = SafeStream(None)
+        sys.stderr = SafeStream(None, "backend.err.log")
     else:
-        sys.stderr = SafeStream(sys.stderr)
+        sys.stderr = SafeStream(sys.stderr, "backend.err.log")
 except Exception:
-    sys.stderr = SafeStream(None)
+    sys.stderr = SafeStream(None, "backend.err.log")
 
 from src.finops_engine.ml_forecast import (
     DEFAULT_FORECAST_HORIZON,

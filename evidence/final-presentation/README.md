@@ -27,3 +27,4 @@ This directory contains genuine, un-fabricated visual captures of the running Ku
 ## 2. Integrity Verification
 - **Zero Fabrication:** Captured directly from live browser sessions running against `src.backend.main`.
 - **Honest Provenance:** Clear labeling between historical benchmark runs (`exp-20261016-141448`), modeled AWS pricing card parameters ($0.031611/core-hr), and current cluster readiness.
+

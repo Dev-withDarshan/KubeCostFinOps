@@ -165,7 +165,12 @@
       });
 
       const elapsed = Math.round(performance.now() - startTime);
-      const data = await response.json();
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {
+        data = { error: response.statusText || `HTTP ${response.status}` };
+      }
       return { ok: response.ok, status: response.status, data, elapsed };
     } catch (err) {
       const elapsed = Math.round(performance.now() - startTime);
@@ -178,7 +183,15 @@
     setLoadingState(true);
 
     // 1. Health check first
-    const healthRes = await apiFetch('/api/health');
+    let healthRes = await apiFetch('/api/health');
+    if (!healthRes.ok && state.apiBaseUrl !== DEFAULT_API_URL) {
+      console.warn(`Configured API Base URL (${state.apiBaseUrl}) unreachable; falling back to same-origin (${DEFAULT_API_URL})`);
+      state.apiBaseUrl = DEFAULT_API_URL;
+      localStorage.removeItem('kubecost_api_base_url');
+      if (el.inputApiBaseUrl) el.inputApiBaseUrl.value = DEFAULT_API_URL;
+      healthRes = await apiFetch('/api/health');
+    }
+
     if (!healthRes.ok) {
       setOnlineStatus(false, healthRes.elapsed);
       showGlobalAlert(`Backend connection error: ${healthRes.error || 'Server returned status ' + healthRes.status}`);
@@ -246,15 +259,20 @@
     }
   }
 
-  function showGlobalAlert(msg) {
+  function showGlobalAlert(msg, title = 'Backend Offline:') {
     if (el.globalAlertBanner) {
-      el.globalAlertBanner.hidden = false;
-      el.alertBannerMsg.textContent = msg;
+      el.globalAlertBanner.removeAttribute('hidden');
+      el.globalAlertBanner.classList.add('alert-active');
+      if (el.alertBannerTitle) el.alertBannerTitle.textContent = title;
+      if (el.alertBannerMsg) el.alertBannerMsg.textContent = msg;
     }
   }
 
   function hideGlobalAlert() {
-    if (el.globalAlertBanner) el.globalAlertBanner.hidden = true;
+    if (el.globalAlertBanner) {
+      el.globalAlertBanner.setAttribute('hidden', '');
+      el.globalAlertBanner.classList.remove('alert-active');
+    }
   }
 
   function setLoadingState(loading) {
