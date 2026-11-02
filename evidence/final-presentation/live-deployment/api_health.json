@@ -1,0 +1,24 @@
+{
+  "status": "UP",
+  "service": "KubeCostFinOps API Server",
+  "version": "1.0.0",
+  "timestamp_utc": "2026-11-02T20:54:57.809834+00:00",
+  "snapshot_status": {
+    "available": true,
+    "latest_snapshot_file": "ksm_snapshot_20261102_195957.json",
+    "last_modified_utc": "2026-11-02T19:59:57.451319+00:00",
+    "age_seconds": 3300,
+    "file_size_bytes": 20409
+  },
+  "experiment_status": {
+    "available": true,
+    "latest_run_id": "exp-20261016-141448"
+  },
+  "capabilities": [
+    "live_metrics_exposition",
+    "modeled_request_costing",
+    "rightsizing_recommendations",
+    "baseline_demand_forecasting",
+    "controlled_finops_experiment"
+  ]
+}

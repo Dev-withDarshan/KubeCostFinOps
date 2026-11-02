@@ -1,0 +1,152 @@
+{
+  "snapshot_timestamp_utc": "2026-11-02T19:59:57.445443+00:00",
+  "source_snapshot": "ksm_snapshot_20261102_195957.json",
+  "financial_classification": "MODELED_REQUEST_ESTIMATE",
+  "pricing_reference": "AWS US-East-1 on-demand baseline rates (m5.large equivalent)",
+  "total_hourly_modeled_cost_usd": 0.0607,
+  "total_monthly_modeled_cost_usd": 44.35,
+  "optimized_monthly_modeled_cost_usd": 14.06,
+  "optimized_hourly_modeled_cost_usd": 0.0193,
+  "projected_monthly_savings_usd": 30.29,
+  "projected_savings_percentage": 68.3,
+  "namespace_breakdown": {
+    "kube-system": {
+      "hourly": 0.0312,
+      "monthly": 22.8,
+      "cpu_cores": 0.95,
+      "memory_gb": 0.283
+    },
+    "edusaas": {
+      "hourly": 0.0179,
+      "monthly": 13.08,
+      "cpu_cores": 0.5,
+      "memory_gb": 0.5
+    },
+    "monitoring": {
+      "hourly": 0.0116,
+      "monthly": 8.47,
+      "cpu_cores": 0.3,
+      "memory_gb": 0.5
+    }
+  },
+  "container_modeled_costs": [
+    {
+      "namespace": "kube-system",
+      "pod": "coredns-559f6c778d-n828f",
+      "container": "coredns",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.0684,
+      "hourly_cost_usd": 0.003451,
+      "monthly_cost_usd": 2.519
+    },
+    {
+      "namespace": "kube-system",
+      "pod": "kube-scheduler-kubecost-finops-local-control-plane",
+      "container": "kube-scheduler",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.0,
+      "hourly_cost_usd": 0.003161,
+      "monthly_cost_usd": 2.3076
+    },
+    {
+      "namespace": "edusaas",
+      "pod": "edusaas-backend-7485d55c8f-wxtv5",
+      "container": "backend",
+      "cpu_cores_requested": 0.25,
+      "memory_gb_requested": 0.25,
+      "hourly_cost_usd": 0.008962,
+      "monthly_cost_usd": 6.5423
+    },
+    {
+      "namespace": "kube-system",
+      "pod": "kube-apiserver-kubecost-finops-local-control-plane",
+      "container": "kube-apiserver",
+      "cpu_cores_requested": 0.25,
+      "memory_gb_requested": 0.0,
+      "hourly_cost_usd": 0.007903,
+      "monthly_cost_usd": 5.769
+    },
+    {
+      "namespace": "monitoring",
+      "pod": "kube-state-metrics-5ccbbf846b-sxzp5",
+      "container": "kube-state-metrics",
+      "cpu_cores_requested": 0.05,
+      "memory_gb_requested": 0.0625,
+      "hourly_cost_usd": 0.001845,
+      "monthly_cost_usd": 1.3471
+    },
+    {
+      "namespace": "monitoring",
+      "pod": "prometheus-server-5c9c767646-9qhl4",
+      "container": "prometheus",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.25,
+      "hourly_cost_usd": 0.00422,
+      "monthly_cost_usd": 3.0809
+    },
+    {
+      "namespace": "edusaas",
+      "pod": "edusaas-backend-7485d55c8f-kq86l",
+      "container": "backend",
+      "cpu_cores_requested": 0.25,
+      "memory_gb_requested": 0.25,
+      "hourly_cost_usd": 0.008962,
+      "monthly_cost_usd": 6.5423
+    },
+    {
+      "namespace": "kube-system",
+      "pod": "etcd-kubecost-finops-local-control-plane",
+      "container": "etcd",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.0977,
+      "hourly_cost_usd": 0.003575,
+      "monthly_cost_usd": 2.6097
+    },
+    {
+      "namespace": "kube-system",
+      "pod": "kindnet-k9frn",
+      "container": "kindnet-cni",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.0488,
+      "hourly_cost_usd": 0.003368,
+      "monthly_cost_usd": 2.4586
+    },
+    {
+      "namespace": "kube-system",
+      "pod": "coredns-559f6c778d-tddx8",
+      "container": "coredns",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.0684,
+      "hourly_cost_usd": 0.003451,
+      "monthly_cost_usd": 2.519
+    },
+    {
+      "namespace": "kube-system",
+      "pod": "kube-controller-manager-kubecost-finops-local-control-plane",
+      "container": "kube-controller-manager",
+      "cpu_cores_requested": 0.2,
+      "memory_gb_requested": 0.0,
+      "hourly_cost_usd": 0.006322,
+      "monthly_cost_usd": 4.6152
+    },
+    {
+      "namespace": "monitoring",
+      "pod": "metrics-server-6f795874f8-74pmp",
+      "container": "metrics-server",
+      "cpu_cores_requested": 0.05,
+      "memory_gb_requested": 0.0625,
+      "hourly_cost_usd": 0.001845,
+      "monthly_cost_usd": 1.3471
+    },
+    {
+      "namespace": "monitoring",
+      "pod": "opencost-646d9f74c8-whc49",
+      "container": "opencost",
+      "cpu_cores_requested": 0.1,
+      "memory_gb_requested": 0.125,
+      "hourly_cost_usd": 0.003691,
+      "monthly_cost_usd": 2.6942
+    }
+  ],
+  "disclaimer": "Modeled request-based financial estimates calculated using public AWS US-East-1 on-demand reference rates (m5.large equivalent: $0.031611/vCPU-hr, $0.004237/GB-RAM-hr, 730 operational hours/month). These do NOT represent actual cloud billing invoices, in-cluster OpenCost allocations, or measured real-time utilization."
+}

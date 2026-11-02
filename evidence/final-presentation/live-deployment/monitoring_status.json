@@ -1,0 +1,45 @@
+{
+  "timestamp_utc": "2026-11-02T20:54:57.806150+00:00",
+  "source_snapshot": "ksm_snapshot_20261102_195957.json",
+  "integrations": {
+    "prometheus": {
+      "name": "Prometheus Telemetry Server",
+      "target_endpoint": "http://localhost:9090",
+      "available": true,
+      "status": "ONLINE",
+      "probe_result": "HTTP 200"
+    },
+    "kube_state_metrics": {
+      "name": "Kube-State-Metrics (KSM)",
+      "target_endpoint": "http://127.0.0.1:8080/metrics",
+      "available": true,
+      "status": "ONLINE",
+      "probe_result": "Live scraping active"
+    },
+    "opencost": {
+      "name": "OpenCost Cost Allocation Model",
+      "target_endpoint": "http://localhost:9003",
+      "available": true,
+      "status": "ONLINE",
+      "probe_result": "Live OpenCost API active"
+    }
+  },
+  "kubernetes_cluster": {
+    "provider": "Kind / Docker Desktop",
+    "nodes_count": 1,
+    "node_names": [
+      "kubecost-finops-local-control-plane"
+    ],
+    "container_specs_count": 13,
+    "deployments_count": 7,
+    "deployments": [
+      "monitoring/prometheus-server",
+      "monitoring/opencost",
+      "edusaas/edusaas-backend",
+      "kube-system/coredns",
+      "local-path-storage/local-path-provisioner",
+      "monitoring/kube-state-metrics",
+      "monitoring/metrics-server"
+    ]
+  }
+}

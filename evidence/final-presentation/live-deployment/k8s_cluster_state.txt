@@ -1,0 +1,22 @@
+Kubernetes control plane is running at https://127.0.0.1:58267
+CoreDNS is running at https://127.0.0.1:58267/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+NAME                                  STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+kubecost-finops-local-control-plane   Ready    control-plane   17d   v1.37.0   172.18.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+NAMESPACE            NAME                                                          READY   STATUS    RESTARTS      AGE   IP            NODE                                  NOMINATED NODE   READINESS GATES
+edusaas              edusaas-backend-7485d55c8f-kq86l                              1/1     Running   3 (46m ago)   17d   10.244.0.8    kubecost-finops-local-control-plane   <none>           <none>
+edusaas              edusaas-backend-7485d55c8f-wxtv5                              1/1     Running   3 (46m ago)   17d   10.244.0.7    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          coredns-559f6c778d-n828f                                      1/1     Running   3 (46m ago)   17d   10.244.0.3    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          coredns-559f6c778d-tddx8                                      1/1     Running   3 (46m ago)   17d   10.244.0.2    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          etcd-kubecost-finops-local-control-plane                      1/1     Running   3 (46m ago)   17d   172.18.0.2    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          kindnet-k9frn                                                 1/1     Running   3 (46m ago)   17d   172.18.0.2    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          kube-apiserver-kubecost-finops-local-control-plane            1/1     Running   3 (46m ago)   17d   172.18.0.2    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          kube-controller-manager-kubecost-finops-local-control-plane   1/1     Running   3 (46m ago)   17d   172.18.0.2    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          kube-proxy-zhckk                                              1/1     Running   3 (46m ago)   17d   172.18.0.2    kubecost-finops-local-control-plane   <none>           <none>
+kube-system          kube-scheduler-kubecost-finops-local-control-plane            1/1     Running   3 (46m ago)   17d   172.18.0.2    kubecost-finops-local-control-plane   <none>           <none>
+local-path-storage   local-path-provisioner-75f7fc7dc5-7nfqq                       1/1     Running   5 (45m ago)   17d   10.244.0.4    kubecost-finops-local-control-plane   <none>           <none>
+monitoring           kube-state-metrics-5ccbbf846b-sxzp5                           1/1     Running   5 (45m ago)   17d   10.244.0.6    kubecost-finops-local-control-plane   <none>           <none>
+monitoring           metrics-server-6f795874f8-74pmp                               1/1     Running   3 (46m ago)   17d   10.244.0.5    kubecost-finops-local-control-plane   <none>           <none>
+monitoring           opencost-646d9f74c8-whc49                                     1/1     Running   2 (45m ago)   56m   10.244.0.10   kubecost-finops-local-control-plane   <none>           <none>
+monitoring           prometheus-server-5c9c767646-9qhl4                            1/1     Running   1 (46m ago)   59m   10.244.0.9    kubecost-finops-local-control-plane   <none>           <none>
