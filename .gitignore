@@ -19,6 +19,8 @@ env/
 pip-log.txt
 *.pid
 .backend.pid
+backend.log
+backend.err.log
 
 # ========================
 # Node.js / React

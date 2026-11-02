@@ -93,7 +93,7 @@ if (-not $alreadyRunning) {
     Write-Host ('[INFO] Starting lightweight FinOps REST backend server on port ' + $Port + '...') -ForegroundColor Cyan
 
     $backendCmd = '-m src.backend.main --port ' + $Port + ' --host ' + $HostAddress
-    $proc = Start-Process -FilePath 'python' -ArgumentList $backendCmd -WorkingDirectory $scriptDir -WindowStyle Hidden -PassThru
+    $proc = Start-Process -FilePath 'python' -ArgumentList $backendCmd -WorkingDirectory $scriptDir -WindowStyle Hidden -RedirectStandardOutput 'backend.log' -RedirectStandardError 'backend.err.log' -PassThru
 
     if (-not $proc) {
         Write-Host '[FAIL] Failed to launch backend process.' -ForegroundColor Red

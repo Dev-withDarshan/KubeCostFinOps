@@ -75,7 +75,7 @@ if (-not $alreadyRunning) {
 
     Write-Host ('[INFO] Launching presentation backend server on port ' + $Port + '...') -ForegroundColor Cyan
     $backendCmd = '-m src.backend.main --port ' + $Port + ' --host ' + $HostAddress
-    $proc = Start-Process -FilePath 'python' -ArgumentList $backendCmd -WorkingDirectory $scriptDir -WindowStyle Hidden -PassThru
+    $proc = Start-Process -FilePath 'python' -ArgumentList $backendCmd -WorkingDirectory $scriptDir -WindowStyle Hidden -RedirectStandardOutput 'backend.log' -RedirectStandardError 'backend.err.log' -PassThru
 
     if (-not $proc) {
         Write-Host '[FAIL] Could not spawn backend process.' -ForegroundColor Red
@@ -142,3 +142,4 @@ Write-Host '    .\STOP_PRESENTATION.ps1' -ForegroundColor Yellow
 Write-Host ''
 Write-Host '===========================================================================' -ForegroundColor Green
 Write-Host ''
+

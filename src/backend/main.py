@@ -33,11 +33,39 @@ import sys
 import urllib.parse
 from typing import Any, Dict, List, Optional, Tuple
 
-# Safe fallback for GUI/daemon environments where stdout/stderr may be None
-if sys.stdout is None:
-    sys.stdout = open(os.devnull, "w", encoding="utf-8")
-if sys.stderr is None:
-    sys.stderr = open(os.devnull, "w", encoding="utf-8")
+# Safe fallback for GUI/daemon/headless environments where stdout/stderr may be None or invalid
+class SafeStream:
+    def __init__(self, target=None):
+        self.target = target
+    def write(self, s):
+        try:
+            if self.target is not None:
+                self.target.write(s)
+                self.target.flush()
+        except Exception:
+            pass
+    def flush(self):
+        try:
+            if self.target is not None:
+                self.target.flush()
+        except Exception:
+            pass
+
+try:
+    if sys.stdout is None or not hasattr(sys.stdout, "write"):
+        sys.stdout = SafeStream(None)
+    else:
+        sys.stdout = SafeStream(sys.stdout)
+except Exception:
+    sys.stdout = SafeStream(None)
+
+try:
+    if sys.stderr is None or not hasattr(sys.stderr, "write"):
+        sys.stderr = SafeStream(None)
+    else:
+        sys.stderr = SafeStream(sys.stderr)
+except Exception:
+    sys.stderr = SafeStream(None)
 
 from src.finops_engine.ml_forecast import (
     DEFAULT_FORECAST_HORIZON,
@@ -759,8 +787,11 @@ class FinOpsAPIHandler(http.server.BaseHTTPRequestHandler):
 
     def log_message(self, format: str, *args: Any) -> None:
         """Clean single-line timestamped log output."""
-        ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        sys.stderr.write(f"[{ts}] {self.address_string()} - {format % args}\n")
+        try:
+            ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            sys.stderr.write(f"[{ts}] {self.address_string()} - {format % args}\n")
+        except Exception:
+            pass
 
 
 def create_server(
