@@ -34,6 +34,20 @@ if (Test-Path $pidFile) {
     Remove-Item -Path $pidFile -Force -ErrorAction SilentlyContinue
 }
 
+# 1b. Stop tracked monitoring port-forward processes
+$pfFile = '.portforward.pid'
+if (Test-Path $pfFile) {
+    try {
+        Get-Content $pfFile | ForEach-Object {
+            $pfPid = [int]$_
+            if ($pfPid -gt 0) {
+                Stop-Process -Id $pfPid -Force -ErrorAction SilentlyContinue
+            }
+        }
+    } catch {}
+    Remove-Item -Path $pfFile -Force -ErrorAction SilentlyContinue
+}
+
 # 2. Free port 8000
 $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
 if ($conns) {

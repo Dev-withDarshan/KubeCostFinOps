@@ -136,6 +136,41 @@ if (-not $alreadyRunning) {
 
 Write-Host '[PASS] Backend status verified: HTTP 200 READY' -ForegroundColor Green
 
+# 3c. Optional: Detect Local Kubernetes and Enable Live Monitoring Port-Forwards
+try {
+    $k8sPing = kubectl cluster-info --request-timeout=2s 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host '[INFO] Local Kubernetes cluster detected. Checking monitoring port-forwards...' -ForegroundColor Cyan
+        $pfList = @()
+
+        # KSM on 8080
+        $c8080 = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+        if (-not $c8080) {
+            $pf1 = Start-Process kubectl -ArgumentList '-n monitoring port-forward svc/kube-state-metrics 8080:8080 --address 127.0.0.1' -WindowStyle Hidden -PassThru
+            if ($pf1) { $pfList += $pf1.Id }
+        }
+
+        # Prometheus on 9090
+        $c9090 = Get-NetTCPConnection -LocalPort 9090 -State Listen -ErrorAction SilentlyContinue
+        if (-not $c9090) {
+            $pf2 = Start-Process kubectl -ArgumentList '-n monitoring port-forward svc/prometheus-server 9090:9090 --address 127.0.0.1' -WindowStyle Hidden -PassThru
+            if ($pf2) { $pfList += $pf2.Id }
+        }
+
+        # OpenCost on 9003
+        $c9003 = Get-NetTCPConnection -LocalPort 9003 -State Listen -ErrorAction SilentlyContinue
+        if (-not $c9003) {
+            $pf3 = Start-Process kubectl -ArgumentList '-n monitoring port-forward svc/opencost 9003:9003 --address 127.0.0.1' -WindowStyle Hidden -PassThru
+            if ($pf3) { $pfList += $pf3.Id }
+        }
+
+        if ($pfList.Count -gt 0) {
+            $pfList | Out-File -FilePath '.portforward.pid' -Encoding ascii -Append -Force
+            Write-Host '[PASS] Live monitoring port-forwards active (KSM: 8080, Prometheus: 9090, OpenCost: 9003)' -ForegroundColor Green
+        }
+    }
+} catch {}
+
 # 4. Launch Browser
 if (-not $NoBrowser) {
     Write-Host '[INFO] Opening FinOps Dashboard in web browser...' -ForegroundColor Cyan

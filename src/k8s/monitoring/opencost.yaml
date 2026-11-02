@@ -1,4 +1,4 @@
-﻿# src/k8s/monitoring/opencost.yaml — OpenCost Deployment, Service, RBAC, and Pricing ConfigMap
+# src/k8s/monitoring/opencost.yaml — OpenCost Deployment, Service, RBAC, and Pricing ConfigMap
 # Correlates Prometheus telemetry with cloud rate cards to calculate real-time Kubernetes cost allocations.
 # Pinned version: quay.io/kubecost1/kubecost-cost-model:v1.108.1 (standard port 9003)
 
@@ -32,6 +32,8 @@ rules:
       - persistentvolumeclaims
       - configmaps
       - endpoints
+      - resourcequotas
+      - replicationcontrollers
     verbs: ["get", "list", "watch"]
   - apiGroups: ["apps"]
     resources:
@@ -48,6 +50,14 @@ rules:
   - apiGroups: ["autoscaling"]
     resources:
       - horizontalpodautoscalers
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - poddisruptionbudgets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources:
+      - storageclasses
     verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -120,7 +130,7 @@ spec:
       serviceAccountName: opencost
       containers:
         - name: opencost
-          image: quay.io/kubecost1/kubecost-cost-model:v1.108.1
+          image: ghcr.io/opencost/opencost:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: PROMETHEUS_SERVER_ENDPOINT

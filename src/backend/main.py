@@ -31,6 +31,7 @@ import os
 import re
 import sys
 import urllib.parse
+import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
 # Safe fallback for GUI/daemon/headless environments where stdout/stderr may be None or invalid
@@ -556,7 +557,11 @@ def build_monitoring_status_response(results_dir: str = DEFAULT_RESULTS_DIR) -> 
         prom_ok, prom_detail = probe_local_service("http://localhost:9090/-/healthy", timeout=0.3)
 
     ksm_ok, ksm_detail = probe_local_service("http://127.0.0.1:8080/metrics", timeout=0.3)
-    opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/status", timeout=0.3)
+    opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/healthz", timeout=0.3)
+    if not opencost_ok:
+        opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/status", timeout=0.3)
+    if not opencost_ok:
+        opencost_ok, opencost_detail = probe_local_service("http://localhost:9003/healthz", timeout=0.3)
     if not opencost_ok:
         opencost_ok, opencost_detail = probe_local_service("http://localhost:9003/status", timeout=0.3)
 

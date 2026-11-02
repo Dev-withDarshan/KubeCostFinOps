@@ -68,7 +68,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // 4. Section 3: Rightsizing & Recommendations
     const recsContainer = document.getElementById('recommendationsContainer');
-    const recCards = recsContainer ? recsContainer.querySelectorAll('.recommendation-card').length : 0;
+    const recCards = recsContainer ? recsContainer.querySelectorAll('.rec-card, .recommendation-card').length : 0;
     const countAll = document.getElementById('countRecsAll')?.textContent || '0';
     checks.recommendations = {
         cardCount: recCards,
