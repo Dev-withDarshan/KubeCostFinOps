@@ -376,6 +376,45 @@ class TestBackendAPI(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertEqual(data["status"], "SUCCESS")
 
+    def test_readiness_endpoint(self):
+        """Readiness endpoint must return HTTP 200 and status READY."""
+        code, data = self._http_get("/api/ready")
+        self.assertEqual(code, 200)
+        self.assertEqual(data["status"], "READY")
+        self.assertEqual(data["service"], "KubeCostFinOps API Server")
+
+        code2, data2 = self._http_get("/api/v1/ready")
+        self.assertEqual(code2, 200)
+        self.assertEqual(data2["status"], "READY")
+
+    def test_monitoring_status_endpoint(self):
+        """Monitoring status endpoint must return integrations and cluster topology."""
+        code, data = self._http_get("/api/v1/monitoring/status")
+        self.assertEqual(code, 200)
+        self.assertIn("integrations", data)
+        self.assertIn("prometheus", data["integrations"])
+        self.assertIn("kube_state_metrics", data["integrations"])
+        self.assertIn("opencost", data["integrations"])
+        self.assertIn("kubernetes_cluster", data)
+        self.assertIn("status", data["integrations"]["prometheus"])
+        self.assertIn("status", data["integrations"]["kube_state_metrics"])
+        self.assertIn("status", data["integrations"]["opencost"])
+
+    def test_cost_summary_has_optimized_and_savings(self):
+        """Cost summary endpoint must include baseline, optimized, and savings fields."""
+        code, data = self._http_get("/api/v1/costs/summary")
+        self.assertEqual(code, 200)
+        self.assertIn("total_monthly_modeled_cost_usd", data)
+        self.assertIn("optimized_monthly_modeled_cost_usd", data)
+        self.assertIn("projected_monthly_savings_usd", data)
+        self.assertIn("projected_savings_percentage", data)
+        self.assertGreater(data["total_monthly_modeled_cost_usd"], 0)
+        self.assertGreaterEqual(data["total_monthly_modeled_cost_usd"], data["optimized_monthly_modeled_cost_usd"])
+        self.assertEqual(
+            round(data["total_monthly_modeled_cost_usd"] - data["optimized_monthly_modeled_cost_usd"], 2),
+            round(data["projected_monthly_savings_usd"], 2)
+        )
+
 
 class TestForecastingModule(unittest.TestCase):
     """Unit tests for src/finops_engine/ml_forecast.py."""
@@ -445,7 +484,6 @@ class TestForecastingModule(unittest.TestCase):
         self.assertIsInstance(first_obs["is_assignment_deadline"], bool)
         self.assertGreater(first_obs["active_students"], 0)
         self.assertGreater(first_obs["cpu_used_m"], 0.0)
-
 
 
 if __name__ == "__main__":

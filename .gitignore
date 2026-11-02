@@ -17,6 +17,8 @@ env/
 *.env.local
 .python-version
 pip-log.txt
+*.pid
+.backend.pid
 
 # ========================
 # Node.js / React
