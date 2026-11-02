@@ -48,6 +48,22 @@ if (Test-Path $pfFile) {
     Remove-Item -Path $pfFile -Force -ErrorAction SilentlyContinue
 }
 
+# 1c. Free monitoring ports (8080, 9090, 9003) if held by kubectl
+foreach ($mPort in @(8080, 9090, 9003)) {
+    $mConns = Get-NetTCPConnection -LocalPort $mPort -State Listen -ErrorAction SilentlyContinue
+    if ($mConns) {
+        foreach ($mConn in $mConns) {
+            $mPid = $mConn.OwningProcess
+            if ($mPid -gt 0) {
+                $mp = Get-Process -Id $mPid -ErrorAction SilentlyContinue
+                if ($mp -and ($mp.ProcessName -match 'kubectl' -or $mp.ProcessName -match 'python')) {
+                    Stop-Process -Id $mPid -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
+}
+
 # 2. Free port 8000
 $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
 if ($conns) {
