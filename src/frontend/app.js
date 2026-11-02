@@ -1092,19 +1092,60 @@
     // Refresh button
     if (el.btnRefreshAll) el.btnRefreshAll.addEventListener('click', () => refreshDashboard());
 
-    // Settings drawer
+    // Settings drawer controller helpers
+    function openSettingsDrawer() {
+      if (!el.settingsDrawer) return;
+      el.settingsDrawer.hidden = false;
+      el.settingsDrawer.classList.add('open');
+      if (el.inputApiBaseUrl) el.inputApiBaseUrl.value = state.apiBaseUrl;
+      if (el.inputBufferPct) el.inputBufferPct.value = state.bufferPct.toFixed(2);
+      if (el.btnCloseSettings) el.btnCloseSettings.focus();
+    }
+
+    function closeSettingsDrawer() {
+      if (!el.settingsDrawer) return;
+      el.settingsDrawer.classList.remove('open');
+      el.settingsDrawer.hidden = true;
+      if (el.btnToggleSettings) el.btnToggleSettings.focus();
+    }
+
+    // Explicitly guarantee drawer is closed on initial setup
+    if (el.settingsDrawer) {
+      el.settingsDrawer.classList.remove('open');
+      el.settingsDrawer.hidden = true;
+    }
+
     if (el.btnToggleSettings) {
-      el.btnToggleSettings.addEventListener('click', () => {
-        if (el.settingsDrawer) el.settingsDrawer.hidden = false;
-        if (el.inputApiBaseUrl) el.inputApiBaseUrl.value = state.apiBaseUrl;
+      el.btnToggleSettings.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSettingsDrawer();
       });
     }
 
     if (el.btnCloseSettings) {
-      el.btnCloseSettings.addEventListener('click', () => {
-        if (el.settingsDrawer) el.settingsDrawer.hidden = true;
+      el.btnCloseSettings.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeSettingsDrawer();
       });
     }
+
+    // Close when clicking the backdrop outside drawer content
+    if (el.settingsDrawer) {
+      el.settingsDrawer.addEventListener('click', (e) => {
+        if (e.target === el.settingsDrawer) {
+          closeSettingsDrawer();
+        }
+      });
+    }
+
+    // Close with Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        if (el.settingsDrawer && (el.settingsDrawer.classList.contains('open') || !el.settingsDrawer.hidden)) {
+          closeSettingsDrawer();
+        }
+      }
+    });
 
     if (el.btnSaveApiUrl) {
       el.btnSaveApiUrl.addEventListener('click', () => {
@@ -1112,7 +1153,7 @@
         if (newUrl) {
           state.apiBaseUrl = newUrl;
           localStorage.setItem('kubecost_api_base_url', newUrl);
-          if (el.settingsDrawer) el.settingsDrawer.hidden = true;
+          closeSettingsDrawer();
           refreshDashboard();
         }
       });

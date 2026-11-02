@@ -56,10 +56,10 @@
   </header>
 
   <!-- Settings Panel (Collapsible) -->
-  <aside class="settings-drawer" id="settingsDrawer" hidden>
+  <aside class="settings-drawer" id="settingsDrawer" role="dialog" aria-modal="true" aria-labelledby="settingsDrawerTitle" hidden>
     <div class="settings-drawer-content">
       <div class="settings-header">
-        <h3>Configuration &amp; API Endpoint</h3>
+        <h3 id="settingsDrawerTitle">Configuration &amp; API Endpoint</h3>
         <button class="btn-close" id="btnCloseSettings" aria-label="Close settings">&times;</button>
       </div>
       <div class="settings-body">
