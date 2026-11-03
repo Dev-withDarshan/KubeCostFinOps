@@ -12,3 +12,4 @@ ExecStart=/bin/bash /opt/KubeCostFinOps/scripts/run_port_forwards.sh
 
 [Install]
 WantedBy=multi-user.target
+

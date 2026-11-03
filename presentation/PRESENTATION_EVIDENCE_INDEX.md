@@ -209,3 +209,4 @@ This document serves as the **academic evidence index** for the BCSE355L project
 | :--- | :--- | :--- |
 | Primary Scientific Deliverable | End-to-end FinOps intelligence engine bridging object-state telemetry and cloud economics | Repository root, `src/finops_engine/` |
 | Operational Cloud Verification | Working live deployment on public AWS EC2 host with zero-spend protection | Verified live endpoint: `http://16.16.185.117:8000` |
+

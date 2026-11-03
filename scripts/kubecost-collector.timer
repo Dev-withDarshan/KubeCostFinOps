@@ -8,3 +8,4 @@ Unit=kubecost-collector.service
 
 [Install]
 WantedBy=timers.target
+
