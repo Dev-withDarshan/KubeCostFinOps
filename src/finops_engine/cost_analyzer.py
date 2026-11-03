@@ -274,7 +274,7 @@ def parse_ksm_metrics(metrics_text: str) -> Dict[str, Any]:
         r'kube_pod_info\{namespace="([^"]+)",pod="([^"]+)",(?:[^}]*,)?host_ip="([^"]*)",(?:[^}]*,)?pod_ip="([^"]*)",(?:[^}]*,)?node="([^"]*)"'
     )
     phase_pattern = re.compile(
-        r'kube_pod_status_phase\{namespace="([^"]+)",pod="([^"]+)",phase="([^"]+)"\}\s+([0-9.]+)'
+        r'kube_pod_status_phase\{namespace="([^"]+)",pod="([^"]+)",(?:[^}]*,)?phase="([^"]+)"\}\s+([0-9.]+)'
     )
     node_cond_pattern = re.compile(
         r'kube_node_status_condition\{node="([^"]+)",condition="([^"]+)",status="([^"]+)"\}\s+([0-9.]+)'

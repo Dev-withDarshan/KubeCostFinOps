@@ -417,6 +417,7 @@ def build_forecast_response(
             data_provenance="LIVE_SNAPSHOT_HISTORY",
         )
         res["scan_provenance"] = prov
+        res["historical_observations_count"] = len(records)
         return 200, res
 
     else:
