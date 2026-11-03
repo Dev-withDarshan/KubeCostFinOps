@@ -505,11 +505,17 @@
         const curMem = item.current_memory_request_gb || 0;
         const propMem = item.proposed_memory_request_gb || 0;
         const savings = item.projected_monthly_savings_usd || 0;
+        const catBadgeClass = item.is_application ? 'badge-success' : (item.is_control_plane ? 'badge-warning' : 'badge-neutral');
+        const catLabel = item.category_label || (item.is_application ? 'Application' : 'Infrastructure');
+        const advisoryHtml = item.safety_advisory ? `<div class="rec-detail-item text-muted" style="font-size:0.8rem; margin-top:0.35rem;"><strong>Safety Note:</strong> ${escapeHtml(item.safety_advisory)}</div>` : '';
 
         card.innerHTML = `
           <div class="rec-card-header">
-            <span class="rec-target-title">${escapeHtml(workload)}</span>
-            <span class="rec-action-badge badge-downsize">Downsize Requests</span>
+            <div>
+              <span class="rec-target-title">${escapeHtml(workload)}</span>
+              <span class="badge ${catBadgeClass}" style="margin-left: 0.5rem; font-size: 0.72rem;">${escapeHtml(catLabel)}</span>
+            </div>
+            <span class="rec-action-badge badge-downsize">${item.is_control_plane ? 'Protected Control Plane' : 'Downsize Requests'}</span>
           </div>
 
           <div class="rec-spec-comparison">
@@ -528,6 +534,7 @@
             <div class="rec-detail-item"><strong>Evidence:</strong> ${escapeHtml(item.evidence || 'Observed requests in KSM.')}</div>
             <div class="rec-detail-item"><strong>Assumptions:</strong> ${escapeHtml(item.assumptions || '20% safety margin above peak.')}</div>
             <div class="rec-detail-item"><strong>Confidence:</strong> ${escapeHtml(item.confidence || 'Medium (Modeled)')}</div>
+            ${advisoryHtml}
           </div>
 
           <div class="rec-card-footer">
@@ -539,10 +546,15 @@
         const dep = item.deployment || item.name || 'Workload';
         const curTarget = item.current_target_cpu || 80;
         const recTarget = item.recommended_target_cpu || 50;
+        const catBadgeClass = item.is_application ? 'badge-success' : 'badge-neutral';
+        const catLabel = item.category_label || (item.is_application ? 'Application' : 'Infrastructure');
 
         card.innerHTML = `
           <div class="rec-card-header">
-            <span class="rec-target-title">Deployment: ${escapeHtml(dep)}</span>
+            <div>
+              <span class="rec-target-title">Deployment: ${escapeHtml(dep)}</span>
+              <span class="badge ${catBadgeClass}" style="margin-left: 0.5rem; font-size: 0.72rem;">${escapeHtml(catLabel)}</span>
+            </div>
             <span class="rec-action-badge badge-hpa">HPA Threshold Tuning</span>
           </div>
 
@@ -560,7 +572,8 @@
 
           <div class="rec-details-list">
             <div class="rec-detail-item"><strong>Evidence:</strong> ${escapeHtml(item.evidence || 'Observed replicas in KSM.')}</div>
-            <div class="rec-detail-item"><strong>Reasoning:</strong> ${escapeHtml(item.reason || 'High burstiness requires earlier expansion.')}</div>
+            <div class="rec-detail-item"><strong>Burst Ratio:</strong> ${item.burst_ratio || 2.83} &bull; <em class="text-muted">(Modeled Assumption)</em></div>
+            <div class="rec-detail-item"><strong>Reasoning:</strong> ${escapeHtml(item.reason || item.rationale || 'High burstiness requires earlier expansion.')}</div>
             <div class="rec-detail-item"><strong>Confidence:</strong> ${escapeHtml(item.confidence || 'High')}</div>
           </div>
 

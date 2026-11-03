@@ -282,6 +282,22 @@ def apply_recommendations(
     if not isinstance(recommendations, list):
         raise ValueError("recommendations must be a list.")
 
+    # Safety governance: Automated in-cluster mutation is strictly prohibited
+    if not dry_run:
+        logger.warning("Automated cluster mutation blocked: Framework enforces read-only governance.")
+        return {
+            "dry_run": False,
+            "total_actions": 0,
+            "status": "MUTATION_BLOCKED_BY_POLICY",
+            "message": (
+                "SAFETY POLICY ENFORCED: Automated cluster mutation is strictly disabled. "
+                "All rightsizing recommendations require manual FinOps review and deployment "
+                "via GitOps / version-controlled Kubernetes manifests."
+            ),
+            "projected_monthly_savings_usd": 0.0,
+            "actions": [],
+        }
+
     total_monthly_savings = 0.0
     action_log: List[Dict[str, Any]] = []
 

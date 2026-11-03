@@ -276,6 +276,48 @@ def build_cost_summary_response(results_dir: str = DEFAULT_RESULTS_DIR) -> Tuple
     }
 
 
+def classify_workload(namespace: str, workload_name: str) -> Dict[str, Any]:
+    """Classify Kubernetes workload into tier, actionability, and safety profile."""
+    pod_name = workload_name.split("/")[0] if "/" in workload_name else workload_name
+    control_plane_prefixes = ("etcd-", "kube-apiserver-", "kube-controller-manager-", "kube-scheduler-")
+    is_control_plane = namespace == "kube-system" and any(pod_name.startswith(p) for p in control_plane_prefixes)
+
+    if is_control_plane:
+        return {
+            "workload_category": "CONTROL_PLANE",
+            "category_label": "Control Plane (Protected)",
+            "is_application": False,
+            "is_control_plane": True,
+            "is_actionable": False,
+            "safety_advisory": (
+                "PROTECTED CONTROL-PLANE: Static master component. In production cloud environments "
+                "(e.g. AWS EKS), control-plane sizing is fully managed by AWS and cannot be resized. "
+                "In self-managed clusters, reducing master resources risks cluster stability and quorum loss."
+            ),
+        }
+    elif namespace in ("kube-system", "monitoring", "local-path-storage"):
+        return {
+            "workload_category": "INFRASTRUCTURE",
+            "category_label": "Cluster Infrastructure",
+            "is_application": False,
+            "is_control_plane": False,
+            "is_actionable": False,
+            "safety_advisory": (
+                "SYSTEM INFRASTRUCTURE: Core cluster observability, storage, or networking component. "
+                "Modifications should be evaluated against cluster-wide telemetry overhead."
+            ),
+        }
+    else:
+        return {
+            "workload_category": "APPLICATION",
+            "category_label": "Application Workload",
+            "is_application": True,
+            "is_control_plane": False,
+            "is_actionable": True,
+            "safety_advisory": "ACTIONABLE APPLICATION: Workload is safe for rightsizing review via GitOps PR.",
+        }
+
+
 def build_recommendations_response(
     results_dir: str = DEFAULT_RESULTS_DIR,
     rec_type: str = "all",
@@ -320,6 +362,14 @@ def build_recommendations_response(
 
         for r in rightsizing_recs:
             r_annotated = dict(r)
+            cls_info = classify_workload(r.get("namespace", ""), r.get("workload", ""))
+            r_annotated["workload_category"] = cls_info["workload_category"]
+            r_annotated["category_label"] = cls_info["category_label"]
+            r_annotated["is_application"] = cls_info["is_application"]
+            r_annotated["is_control_plane"] = cls_info["is_control_plane"]
+            r_annotated["is_actionable"] = cls_info["is_actionable"]
+            r_annotated["safety_advisory"] = cls_info["safety_advisory"]
+            r_annotated["governance_policy"] = "NEVER_AUTO_APPLY — Advisory only. Manual FinOps review and GitOps deployment required."
             r_annotated["evidence"] = (
                 f"Observed container specification requested {r.get('current_cpu_request')} CPU cores "
                 f"and {r.get('current_memory_request_gb')} GiB RAM."
@@ -353,6 +403,20 @@ def build_recommendations_response(
             for hpa_rec in hpa_recs:
                 hpa_annotated = dict(hpa_rec)
                 dep = hpa_annotated.get("deployment", "unknown")
+                ns = hpa_annotated.get("namespace", "default")
+                cls_info = classify_workload(ns, dep)
+                hpa_annotated["workload_category"] = cls_info["workload_category"]
+                hpa_annotated["category_label"] = cls_info["category_label"]
+                hpa_annotated["is_application"] = cls_info["is_application"]
+                hpa_annotated["burst_ratio_type"] = "MODELED_ASSUMPTION"
+                hpa_annotated["burst_ratio_notice"] = (
+                    "Modeled assumption: Burst ratio (2.83) is derived from simulated university exam/deadline "
+                    "traffic profiles, not continuous measured cAdvisor prometheus queries."
+                )
+                hpa_annotated["measured_traffic_integrated"] = False
+                hpa_annotated["governance_policy"] = (
+                    "NEVER_AUTO_APPLY — Advisory only. Workload autoscaling policies must be reviewed before manifest deployment."
+                )
                 hpa_annotated["evidence"] = (
                     f"Deployment '{dep}' verified from KSM kube_deployment_status_replicas."
                 )
@@ -372,6 +436,16 @@ def build_recommendations_response(
         "total_rightsizing_recommendations": len(rightsizing_list),
         "total_hpa_recommendations": len(hpa_list),
         "total_projected_monthly_savings_usd": round(total_projected_savings, 2),
+        "auto_apply_prohibited": True,
+        "governance_policy": (
+            "NEVER_AUTO_APPLY — The FinOps engine operates strictly in advisory mode. Direct automated mutation "
+            "of cluster workloads is intentionally disabled to protect cluster stability."
+        ),
+        "category_counts": {
+            "application": sum(1 for r in rightsizing_list if r.get("is_application")),
+            "control_plane": sum(1 for r in rightsizing_list if r.get("is_control_plane")),
+            "infrastructure": sum(1 for r in rightsizing_list if not r.get("is_application") and not r.get("is_control_plane")),
+        },
         "limitations_notice": (
             "These recommendations evaluate Kubernetes object specifications from Kube-State-Metrics. "
             "They do not assert continuous cAdvisor kernel utilization or cloud invoice commitments."
