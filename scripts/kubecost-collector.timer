@@ -1,0 +1,10 @@
+[Unit]
+Description=Run KubeCostFinOps collector every 60 seconds
+
+[Timer]
+OnBootSec=30sec
+OnUnitActiveSec=60sec
+Unit=kubecost-collector.service
+
+[Install]
+WantedBy=timers.target

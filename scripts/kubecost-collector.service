@@ -1,0 +1,9 @@
+[Unit]
+Description=KubeCostFinOps Periodic Telemetry Collector
+After=network.target kubecost-portforwards.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/KubeCostFinOps
+ExecStart=/usr/bin/python3 -m src.finops_engine.pipeline --endpoint http://127.0.0.1:8080/metrics --output-dir results

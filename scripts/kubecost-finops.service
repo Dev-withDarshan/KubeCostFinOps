@@ -1,0 +1,14 @@
+[Unit]
+Description=KubeCostFinOps REST API Server & Live Dashboard
+After=network.target kubecost-portforwards.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/KubeCostFinOps
+ExecStart=/usr/bin/python3 -m src.backend.main --port 8000 --host 0.0.0.0
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

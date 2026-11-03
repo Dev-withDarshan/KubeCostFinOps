@@ -1,0 +1,14 @@
+[Unit]
+Description=Kubernetes Monitoring Port Forwards (KSM 8080, Prometheus 9090, OpenCost 9003)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Restart=always
+RestartSec=5
+WorkingDirectory=/opt/KubeCostFinOps
+ExecStart=/bin/bash /opt/KubeCostFinOps/scripts/run_port_forwards.sh
+
+[Install]
+WantedBy=multi-user.target
