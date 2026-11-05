@@ -879,6 +879,9 @@ class FinOpsAPIHandler(http.server.BaseHTTPRequestHandler):
             logger.error("Failed to transmit static file %s: %s", filepath, exc)
             self.send_error(500, "Internal Server Error reading static asset")
 
+    def do_HEAD(self) -> None:
+        self.do_GET()
+
     def do_POST(self) -> None:
         """Reject non-GET mutations on this read-only API."""
         self.send_json(405, {
