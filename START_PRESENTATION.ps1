@@ -47,10 +47,7 @@ try {
     Write-Host ('[PASS] Python environment verified: ' + $pythonVer) -ForegroundColor Green
     $pythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source
     if ($pythonPath) {
-        $pythonwPath = $pythonPath -replace 'python\.exe$', 'pythonw.exe'
-        if (Test-Path $pythonwPath) {
-            $pythonCmd = $pythonwPath
-        }
+        $pythonCmd = $pythonPath
     }
 }
 catch {

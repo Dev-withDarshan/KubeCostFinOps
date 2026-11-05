@@ -627,18 +627,11 @@ def probe_local_service(url: str, timeout: float = 0.3) -> Tuple[bool, str]:
 
 def build_monitoring_status_response(results_dir: str = DEFAULT_RESULTS_DIR) -> Tuple[int, Dict[str, Any]]:
     """Inspect availability of Prometheus, Kube-State-Metrics, OpenCost, and K8s topology."""
-    prom_ok, prom_detail = probe_local_service("http://127.0.0.1:9090/-/healthy", timeout=0.3)
-    if not prom_ok:
-        prom_ok, prom_detail = probe_local_service("http://localhost:9090/-/healthy", timeout=0.3)
-
-    ksm_ok, ksm_detail = probe_local_service("http://127.0.0.1:8080/metrics", timeout=0.3)
-    opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/healthz", timeout=0.3)
+    prom_ok, prom_detail = probe_local_service("http://127.0.0.1:9090/-/healthy", timeout=0.2)
+    ksm_ok, ksm_detail = probe_local_service("http://127.0.0.1:8080/metrics", timeout=0.2)
+    opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/healthz", timeout=0.2)
     if not opencost_ok:
-        opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/status", timeout=0.3)
-    if not opencost_ok:
-        opencost_ok, opencost_detail = probe_local_service("http://localhost:9003/healthz", timeout=0.3)
-    if not opencost_ok:
-        opencost_ok, opencost_detail = probe_local_service("http://localhost:9003/status", timeout=0.3)
+        opencost_ok, opencost_detail = probe_local_service("http://127.0.0.1:9003/status", timeout=0.2)
 
     latest_file = find_latest_snapshot(results_dir)
     snapshot = load_snapshot(latest_file) if latest_file else {}
@@ -692,6 +685,7 @@ class FinOpsAPIHandler(http.server.BaseHTTPRequestHandler):
     """HTTP Request Handler implementing safe routing and JSON responses."""
 
     server_version = f"KubeCostFinOps-API/{API_VERSION}"
+    timeout = 10
 
     def send_json(self, status_code: int, data: Dict[str, Any]) -> None:
         """Helper to serialize and transmit JSON responses with proper headers."""
@@ -913,7 +907,8 @@ def create_server(
     results_dir: str = DEFAULT_RESULTS_DIR,
 ) -> http.server.HTTPServer:
     """Instantiate and configure HTTP server."""
-    server = http.server.HTTPServer((host, port), FinOpsAPIHandler)
+    server_class = getattr(http.server, "ThreadingHTTPServer", http.server.HTTPServer)
+    server = server_class((host, port), FinOpsAPIHandler)
     setattr(server, "results_dir", results_dir)
     return server
 
